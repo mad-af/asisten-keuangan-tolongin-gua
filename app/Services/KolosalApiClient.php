@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Http;
 class KolosalApiClient
 {
     protected string $baseUrl;
+
     protected string $apiKey;
+
     protected string $model; // always from env/config
 
     public function __construct()
@@ -25,7 +27,7 @@ class KolosalApiClient
     protected function headers(): array
     {
         return [
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer '.$this->apiKey,
             'Content-Type' => 'application/json',
         ];
     }
@@ -51,7 +53,7 @@ class KolosalApiClient
         $payload['model'] = $this->model;
 
         $res = Http::withHeaders($this->headers())
-            ->post($this->baseUrl . '/v1/chat/completions', $payload);
+            ->post($this->baseUrl.'/v1/chat/completions', $payload);
 
         $elapsed = $this->elapsedMs($start);
         $reqId = $res->header('x-request-id') ?? null;
@@ -61,7 +63,11 @@ class KolosalApiClient
         }
 
         $body = null;
-        try { $body = $res->json(); } catch (\Throwable $e) { $body = null; }
+        try {
+            $body = $res->json();
+        } catch (\Throwable $e) {
+            $body = null;
+        }
 
         $errorMessage = is_array($body) && isset($body['error'])
             ? (string) ($body['error']['message'] ?? $body['error'])
@@ -76,7 +82,6 @@ class KolosalApiClient
     }
 }
 
-
 /* ----------------------
    DTOs (recommended: move to App\Dtos or App\Http\Requests in real project)
    ---------------------- */
@@ -84,6 +89,7 @@ class KolosalApiClient
 class ChatRequest
 {
     public array $messages;
+
     public ?int $max_tokens;
 
     public function __construct(array $messages, ?int $max_tokens = null)
@@ -98,7 +104,7 @@ class ChatRequest
 
     public static function fromArray(array $payload): self
     {
-        if (!isset($payload['messages']) || !is_array($payload['messages'])) {
+        if (! isset($payload['messages']) || ! is_array($payload['messages'])) {
             throw new \InvalidArgumentException('Missing required field: messages');
         }
 
@@ -114,7 +120,9 @@ class ChatRequest
             'messages' => $this->messages,
         ];
 
-        if ($this->max_tokens !== null) $out['max_tokens'] = $this->max_tokens;
+        if ($this->max_tokens !== null) {
+            $out['max_tokens'] = $this->max_tokens;
+        }
 
         return $out;
     }
@@ -123,9 +131,13 @@ class ChatRequest
 class ChatResponse
 {
     public bool $ok;
+
     public int $status;
+
     public mixed $data; // decoded JSON or null
+
     public ?string $error;
+
     public array $meta;
 
     private function __construct(bool $ok, int $status, mixed $data, ?string $error, array $meta = [])
@@ -148,7 +160,44 @@ class ChatResponse
     }
 
     // small helpers
-    public function isOk(): bool { return $this->ok; }
-    public function getData(): mixed { return $this->data; }
-    public function getError(): ?string { return $this->error; }
+    public function isOk(): bool
+    {
+        return $this->ok;
+    }
+
+    public function getData(): mixed
+    {
+        return $this->data;
+    }
+
+    public function getError(): ?string
+    {
+        return $this->error;
+    }
+
+    public function getChoices(): array
+    {
+        if (! is_array($this->data)) {
+            return [];
+        }
+        $choices = $this->data['choices'] ?? null;
+
+        return is_array($choices) ? $choices : [];
+    }
+
+    public function messages(): array
+    {
+        $out = [];
+        foreach ($this->getChoices() as $c) {
+            $m = $c['message'] ?? null;
+            if (is_array($m)) {
+                $out[] = [
+                    'role' => $m['role'] ?? null,
+                    'content' => $m['content'] ?? null,
+                ];
+            }
+        }
+
+        return $out;
+    }
 }
