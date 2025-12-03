@@ -43,7 +43,9 @@ Output format (MANDATORY):
 3) Each function must include parameters inside square brackets: func_name [key:value; key:value].
 4) If a function requires complex parameters, use a TOON object: func_name [{key:value; key2:value2}].
 5) Persona_chat is mandatory and must always be the final function in the list.
-6) The 'reason' parameter must be a full English summary of all reasoning and actions taken by the Orchestrator.
+6) The reason parameter must:
+   - be plain English (no colon ':' allowed),  
+   - contain a full summary of all reasoning and actions performed by the Orchestrator (which functions ran, what was done), 
 
 Rules:
 - Always output only the TOON block (no explanation).
@@ -68,9 +70,8 @@ End.
         $messages = [
             [
                 'role' => 'system',
-                'content' => `
-
-                `,
+                'content' => "
+                ",
             ],
         ];
 
