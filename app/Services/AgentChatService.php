@@ -4,11 +4,10 @@ namespace App\Services;
 
 class AgentChatService
 {
-    private KolosalApiClient $chatClient;
 
-    public function __construct()
+    public function __construct(protected KolosalApiClient $chatClient)
     {
-        $this->chatClient = app(KolosalApiClient::class);
+     
     }
 
     private function agentOrchestratorMessages(string $message): array
@@ -24,7 +23,7 @@ Available functions:
   > Store an income transaction with amount, note, and a strict date (YYYY-MM-DD).
 - transaction_out(int amount, string note, string date)
   > Store an expense transaction with amount, note, and a strict date (YYYY-MM-DD).
-- persona_chat(string reasoning)
+- persona_chat(string reason)
   > Generate a natural, user-facing reply using the reasoning summary provided.
 - finance_analyze_chat(string context)
   > Provide financial insights or explanations based on the given analysis context.
@@ -101,76 +100,28 @@ End.
         return $messages;
     }
 
-    public function agentOrchestratorChat(string $message): ChatResponse
+    public function agentOrchestratorChat(string $message): String
     {
-        $chat = $this->chatClient->chatCompletions([
+        return $this->chatClient->chatCompletions([
             'max_tokens' => 1000,
             'messages' => $this->agentOrchestratorMessages($message),
-        ]);
-        try {
-
-        $messageContent = $chat->messageContent();
-        dd($messageContent,$this->decodeOrchestratorResponse($messageContent));
-        } catch (\Throwable $th) {
-            $this->agentOrchestratorChat($message);
-        }
-        
-        return $chat;
+        ])->messageContent();
     }
 
-    public function agentPersonaChat(?string $message): ChatResponse
+    public function agentPersonaChat(?string $message): string
     {
         return $this->chatClient->chatCompletions([
             'max_tokens' => 1000,
             'messages' => $this->agentPersonaMessages($message),
-        ]);
+        ])->messageContent();
     }
 
-    public function agentFinanceAnalyzeChat(?string $message): ChatResponse
+    public function agentFinanceAnalyzeChat(?string $message): string
     {
         return $this->chatClient->chatCompletions([
             'max_tokens' => 1000,
             'messages' => $this->agentFinanceAnalyzeMessages($message),
-        ]);
-    }
-
-    protected function decodeOrchestratorResponse(string $response): array
-    {
-        $result = [];
-
-        // Ambil semua blok seperti:
-        // transaction_out [amount:60000; note:beli telur; date:2025-12-03]
-        preg_match_all('/(\w+)\s*\[([^\]]+)\]/', $response, $matches, PREG_SET_ORDER);
-
-        foreach ($matches as $match) {
-            $functionName = $match[1];
-            $rawParams = $match[2];
-
-            // Pecah "key:value; key:value"
-            $params = [];
-            foreach (explode(';', $rawParams) as $pair) {
-                $pair = trim($pair);
-                if ($pair === '') {
-                    continue;
-                }
-
-                [$key, $value] = array_map('trim', explode(':', $pair, 2));
-
-                // Optional: cast number
-                if (is_numeric($value)) {
-                    $value = $value + 0; // biar otomatis int/float
-                }
-
-                $params[$key] = $value;
-            }
-
-            $result[] = [
-                'function' => $functionName,
-                'param' => $params,
-            ];
-        }
-
-        return $result;
+        ])->messageContent();
     }
 }
 
