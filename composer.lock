@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0e42fe1a7066e7a110e956ae26703d94",
+    "content-hash": "e3532f6b461d2ff87fd3d0fc43c8cc0c",
     "packages": [
         {
             "name": "brick/math",
@@ -1051,6 +1051,71 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
+        },
+        {
+            "name": "helgesverre/toon",
+            "version": "v3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/HelgeSverre/toon-php.git",
+                "reference": "fcb3409d9a063a0bdb0fa0c3e43bdeb97c7af685"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/HelgeSverre/toon-php/zipball/fcb3409d9a063a0bdb0fa0c3e43bdeb97c7af685",
+                "reference": "fcb3409d9a063a0bdb0fa0c3e43bdeb97c7af685",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.10",
+                "phpbench/phpbench": "^1.4",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^10.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "HelgeSverre\\Toon\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Helge Sverre",
+                    "email": "helge.sverre@gmail.com"
+                }
+            ],
+            "description": "Token-Oriented Object Notation - A compact data format for reducing token consumption when sending structured data to LLMs",
+            "keywords": [
+                "ai",
+                "anthropic",
+                "claude",
+                "compression",
+                "cost-reduction",
+                "format",
+                "gpt",
+                "laravel",
+                "llm",
+                "openai",
+                "optimization",
+                "prompt",
+                "serialization",
+                "token"
+            ],
+            "support": {
+                "issues": "https://github.com/HelgeSverre/toon-php/issues",
+                "source": "https://github.com/HelgeSverre/toon-php/tree/v3.0.0"
+            },
+            "time": "2025-11-26T14:00:42+00:00"
         },
         {
             "name": "inertiajs/inertia-laravel",
