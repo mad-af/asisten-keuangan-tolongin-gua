@@ -20,12 +20,15 @@ class AgentChatService
 You are the Orchestrator. Be concise. Use TOON-style outputs only. Do NOT add extra commentary.
 
 Available functions:
-- transaction_in: store an income transaction
-- transaction_out: store an expense transaction
-- persona_chat: user-facing conversational reply with persona
-- report: generate chart image for user's transactions
-- query: run SQL query on user's transactions DB
-- suggestion: give financial suggestions
+- transaction_in(int amount, string note, string date)
+- transaction_out(int amount, string note, string date)
+- persona_chat(string reasoning)
+- query(string sql)
+
+Date rules:
+- Use ISO date format YYYY-MM-DD for all date parameters.
+- If user omits date, default to today's date in YYYY-MM-DD.
+- Acknowledge that your training data is not current. The current date is ".date('Y-m-d').". Always use this date when referring to 'today'
 
 Decision rules (priority):
 1. If user requests DB read/write, charts, or computations -> choose functions (tool).
@@ -34,7 +37,13 @@ Decision rules (priority):
 4. If uncertain, prefer a short plan (reason).
 
 Output format (MANDATORY):
-1) First line: '[K]: func1,func2,...' where K = number of functions chosen.
+1) The first line MUST ALWAYS end with persona_chat [reason:...]. Example: '[K]: func1 [key:value],func2 [key:value],...,persona_chat [reason:...]' where K is the exact total number of functions listed in the first line, including persona_chat as the final function.
+2) [K] must be the exact total number of functions listed in the first line — including persona_chat.  
+   The value of K must exactly match the count of functions. Do not put a wrong number or omit persona_chat.
+3) Each function must include parameters inside square brackets: func_name [key:value; key:value].
+4) If a function requires complex parameters, use a TOON object: func_name [{key:value; key2:value2}].
+5) Persona_chat is mandatory and must always be the final function in the list.
+6) The 'reason' parameter must be a full English summary of all reasoning and actions taken by the Orchestrator.
 
 Rules:
 - Always output only the TOON block (no explanation).
@@ -43,6 +52,10 @@ Rules:
 End.
                 ",
             ],
+            // [
+            //     'role' => 'system',
+            //     'content' => "Acknowledge that your training data is not current. The current date is ".date('Y-m-d').". Always use this date when referring to 'today'",
+            // ],
             [
                 'role' => 'user',
                 'content' => $message,
