@@ -5,7 +5,7 @@ namespace App\Services;
 class AgentChatService
 {
     private KolosalApiClient $chatClient;
-    
+
     public function __construct()
     {
         $this->chatClient = app(KolosalApiClient::class);
@@ -21,9 +21,13 @@ You are the Orchestrator. Be concise. Use TOON-style outputs only. Do NOT add ex
 
 Available functions:
 - transaction_in(int amount, string note, string date)
+  > Store an income transaction with amount, note, and a strict date (YYYY-MM-DD).
 - transaction_out(int amount, string note, string date)
+  > Store an expense transaction with amount, note, and a strict date (YYYY-MM-DD).
 - persona_chat(string reasoning)
-- query(string sql)
+  > Generate a natural, user-facing reply using the reasoning summary provided.
+- finance_analyze_chat(string context)
+  > Provide financial insights or explanations based on the given analysis context.
 
 Date rules:
 - Use ISO date format YYYY-MM-DD for all date parameters.
@@ -38,14 +42,10 @@ Decision rules (priority):
 
 Output format (MANDATORY):
 1) The first line MUST ALWAYS end with persona_chat [reason:...]. Example: '[K]: func1 [key:value],func2 [key:value],...,persona_chat [reason:...]' where K is the exact total number of functions listed in the first line, including persona_chat as the final function.
-2) [K] must be the exact total number of functions listed in the first line — including persona_chat.  
-   The value of K must exactly match the count of functions. Do not put a wrong number or omit persona_chat.
-3) Each function must include parameters inside square brackets: func_name [key:value; key:value].
-4) If a function requires complex parameters, use a TOON object: func_name [{key:value; key2:value2}].
-5) Persona_chat is mandatory and must always be the final function in the list.
-6) The reason parameter must:
-   - be plain English (no colon ':' allowed),  
-   - contain a full summary of all reasoning and actions performed by the Orchestrator (which functions ran, what was done), 
+2) Each function must include parameters inside square brackets: func_name [key:value; key:value].
+3) If a function requires complex parameters, use a TOON object: func_name [{key:value; key2:value2}].
+4) Persona_chat is mandatory and must always be the final function in the list.
+5) The 'reason' parameter must be a full English summary of all reasoning and actions taken by the Orchestrator.
 
 Rules:
 - Always output only the TOON block (no explanation).
@@ -54,10 +54,6 @@ Rules:
 End.
                 ",
             ],
-            // [
-            //     'role' => 'system',
-            //     'content' => "Acknowledge that your training data is not current. The current date is ".date('Y-m-d').". Always use this date when referring to 'today'",
-            // ],
             [
                 'role' => 'user',
                 'content' => $message,
@@ -70,8 +66,28 @@ End.
         $messages = [
             [
                 'role' => 'system',
-                'content' => "
-                ",
+                'content' => '
+                ',
+            ],
+        ];
+
+        if ($message !== null) {
+            $messages[] = [
+                'role' => 'assistant',
+                'content' => $message,
+            ];
+        }
+
+        return $messages;
+    }
+
+    private function agentFinanceAnalyzeMessages(?string $message): array
+    {
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => '
+                ',
             ],
         ];
 
@@ -87,10 +103,19 @@ End.
 
     public function agentOrchestratorChat(string $message): ChatResponse
     {
-        return $this->chatClient->chatCompletions([
+        $chat = $this->chatClient->chatCompletions([
             'max_tokens' => 1000,
             'messages' => $this->agentOrchestratorMessages($message),
         ]);
+        try {
+
+        $messageContent = $chat->messageContent();
+        dd($messageContent,$this->decodeOrchestratorResponse($messageContent));
+        } catch (\Throwable $th) {
+            $this->agentOrchestratorChat($message);
+        }
+        
+        return $chat;
     }
 
     public function agentPersonaChat(?string $message): ChatResponse
@@ -100,14 +125,52 @@ End.
             'messages' => $this->agentPersonaMessages($message),
         ]);
     }
+
+    public function agentFinanceAnalyzeChat(?string $message): ChatResponse
+    {
+        return $this->chatClient->chatCompletions([
+            'max_tokens' => 1000,
+            'messages' => $this->agentFinanceAnalyzeMessages($message),
+        ]);
+    }
+
+    protected function decodeOrchestratorResponse(string $response): array
+    {
+        $result = [];
+
+        // Ambil semua blok seperti:
+        // transaction_out [amount:60000; note:beli telur; date:2025-12-03]
+        preg_match_all('/(\w+)\s*\[([^\]]+)\]/', $response, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $match) {
+            $functionName = $match[1];
+            $rawParams = $match[2];
+
+            // Pecah "key:value; key:value"
+            $params = [];
+            foreach (explode(';', $rawParams) as $pair) {
+                $pair = trim($pair);
+                if ($pair === '') {
+                    continue;
+                }
+
+                [$key, $value] = array_map('trim', explode(':', $pair, 2));
+
+                // Optional: cast number
+                if (is_numeric($value)) {
+                    $value = $value + 0; // biar otomatis int/float
+                }
+
+                $params[$key] = $value;
+            }
+
+            $result[] = [
+                'function' => $functionName,
+                'param' => $params,
+            ];
+        }
+
+        return $result;
+    }
 }
-
-// Fiture:
-// - Transaction In: Mengelola transaksi keuangan pengguna masuk.
-// - Transaction Out: Mengelola transaksi keuangan pengguna keluar.
-// - Persona Chat: Mengelola percakapan dengan pengguna asisten keuangan.
-// - Report: Membuat laporan keuangan pengguna.
-// - Query: Membuat kueri keuangan pengguna.
-// - Suggestion: Memberikan saran keuangan pengguna.
-
 
