@@ -26,7 +26,7 @@ Available functions:
 - persona_chat(string reason)
   > Generate a natural, user-facing reply using the reasoning summary provided.
 - finance_analyze_chat(string context)
-  > Provide financial insights or explanations based on the given analysis context.
+  > Analyze user's financial data by reading the transaction table and return insights based on the context.
 
 Date rules:
 - Use ISO date format YYYY-MM-DD for all date parameters.
