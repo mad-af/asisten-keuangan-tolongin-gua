@@ -1,9 +1,9 @@
 <p align="center"><img src="public/assets/logo.webp" width="250" alt="Project Logo"></p>
 
 <p align="center">
-  <a>
+  <span>
     <img src="https://img.shields.io/badge/coverage-110%25-brightgreen" alt="imphnen (Organizer)">
-  </a>
+  </span>
   <a href="https://www.facebook.com/groups/1032515944638255">
     <img src="https://img.shields.io/badge/imphnen-Organizer-blueviolet" alt="imphnen (Organizer)">
   </a>
