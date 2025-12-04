@@ -4,6 +4,8 @@ namespace App\Services;
 
 class AgentToolService
 {
+    protected array $orchestrator = [];
+
     /**
      * Create a new class instance.
      */
@@ -19,22 +21,49 @@ class AgentToolService
      *   ...
      * ]
      */
+    public function getOrchestrator(): array
+    {
+        return $this->orchestrator;
+    }
+
+    public function setOrchestrator(array $items): void
+    {
+        $this->orchestrator = $items;
+    }
+
+    public function addOrchestratorItem(array $item): void
+    {
+        $this->orchestrator[] = $item;
+    }
+
+    public function updateOrchestratorItem(int $index, array $item): void
+    {
+        if (array_key_exists($index, $this->orchestrator)) {
+            $this->orchestrator[$index] = $item;
+        }
+    }
+
     public function call(array $orchestrator): array
     {
+        $this->setOrchestrator($orchestrator);
         $results = [];
 
-        foreach ($orchestrator as $index => $item) {
+        $index = 0;
+        while ($index < count($this->orchestrator)) {
+            $item = $this->orchestrator[$index];
             $functionName = $item['function'] ?? null;
             $params = $item['param'] ?? ($item['arguments'] ?? ($item['params'] ?? []));
 
             if (! is_string($functionName) || $functionName === '') {
                 $results[] = ['index' => $index, 'error' => 'missing_function'];
+                $index++;
 
                 continue;
             }
 
             if (! method_exists($this, $functionName)) {
                 $results[] = ['index' => $index, 'function' => $functionName, 'error' => 'method_not_found'];
+                $index++;
 
                 continue;
             }
@@ -50,8 +79,10 @@ class AgentToolService
                 $return = $rm->invokeArgs($this, $args);
                 $results[] = ['index' => $index, 'function' => $functionName, 'args' => $args, 'result' => $return];
             } catch (\Throwable $e) {
+                dd($e);
                 $results[] = ['index' => $index, 'function' => $functionName, 'error' => 'exception', 'message' => $e->getMessage()];
             }
+            $index++;
         }
 
         return $results;
@@ -133,14 +164,26 @@ class AgentToolService
     }
 
     protected function persona_chat(string $reason, ?array $premessages): string
-    {
-        return $this->agentChat->agentPersonaChat($reason, $premessages);
+    {        
+        return $this->agentChat->agentPersonaChat($reason, $premessages);   
     }
 
     protected function finance_analyze_chat(string $context)
     {
-        $financeAnalyze = $this->agentChat->agentFinanceAnalyze($context);
+        // $this->agentChat->agentFinanceAnalyze($context);
 
-        return $financeAnalyze;
+        $items = $this->getOrchestrator();
+
+        $result = array_map(function ($n) {
+            if ($n['function'] === 'persona_chat') {
+                $n['param']['premessages'] = ['run'];
+            }
+            return $n;
+        }, $items);
+
+        $this->setOrchestrator($result);
+        logger()->info('finance_analyze_chat', [
+            'context' => $context,
+        ]);
     }
 }

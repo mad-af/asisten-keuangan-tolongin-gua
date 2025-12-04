@@ -96,11 +96,13 @@ End.
         ];
 
         if ($premessages !== null) {
-            $messages = array_map(function ($msg) {
-                $msg['role'] = 'assistant';
-                return $msg;
+            $finalpremessages = array_map(function ($msg) {
+                return [
+                    'role' => 'assistant',
+                    'content' => $msg,
+                ];
             }, $premessages);
-            $messages = array_merge($messages, $messages);
+            $messages = array_merge($messages, $finalpremessages);
         }
 
         if ($message !== null) {
