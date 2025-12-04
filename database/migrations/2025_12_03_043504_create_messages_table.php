@@ -13,22 +13,12 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('device_id')
-                ->constrained('devices')
-                ->onDelete('cascade');
-
+            $table->string('from');
+            $table->string('to');
             $table->longText('body')->nullable();
-
-            // text | image | file
-            $table->string('type')->default('text');
-
-            // simpan array attachment (URL / metadata file)
-            $table->json('attachments')->nullable();
 
             // sent / delivered / read (opsional simulasi)
             $table->string('status')->nullable();
-
-            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

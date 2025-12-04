@@ -3,50 +3,137 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
-use App\Models\Device;
 use App\Models\Message;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\DB;
 
 class MessageService
 {
     public function __construct(
-        protected AiParse $parser
+        protected AgentService $agent,
+        protected AgentChatService $agentChat
     ) {}
 
-    public function message(Request $request): array
+    public function send(Request $request)
     {
-        // 1. Find or create device
-        $device = Device::firstOrCreate(
-            ['device_id' => $request->device_id],
-            ['name' => $request->device_name ?? null]
-        );
+        $userMessage = $request->input('message');
+        $deviceId = $request->input('device_id');
 
-        // 2. Store raw message
-        $msg = Message::create([
-            'device_id' => $device->id,
-            'body'      => $request->message,
-            'type'      => 'text',
+        // 1. Simpan pesan pengguna terlebih dahulu
+        $userMessageModel = Message::create([
+            'from' => $deviceId,
+            'to' => 'agent',
+            'body' => $userMessage,
         ]);
 
-        // 3. Parse using AI
-        $parsed = $this->parser->parse($request->message);
+        // 2. Minta Orchestrator untuk menentukan tindakan
+        $agentResponse = $this->agent->chat($userMessage);
+        $functions = $agentResponse['data'] ?? [];
 
-        if ($parsed && isset($parsed['amount'], $parsed['type'])) {
-            Transaction::create([
-                'device_id'   => $device->id,
-                'message_id'  => $msg->id,
-                'amount'      => $parsed['amount'],
-                'currency'    => $parsed['currency'] ?? 'IDR',
-                'type'        => $parsed['type'],
-                'description' => $parsed['description'] ?? null,
-                'date'        => $parsed['date'] ?? now()->toDateString(),
-                'raw_parsed'  => $parsed,
-            ]);
+        $finalReply = 'Maaf, saya tidak bisa memproses permintaan Anda.';
+
+        // 3. Proses setiap fungsi yang dikembalikan
+        foreach ($functions as $funcCall) {
+            $functionName = $funcCall['function'] ?? null;
+            $params = $funcCall['args'] ?? [];
+
+            if ($functionName === 'transaction_in' || $functionName === 'transaction_out') {
+                // Simpan transaksi ke tabel transactions
+                Transaction::create([
+                    'device_id' => $deviceId,
+                    'type' => $functionName === 'transaction_in' ? 'IN' : 'OUT',
+                    'amount' => $params[0] ?? 0,
+                    'note' => $params[1] ?? '',
+                    'date' => $params[2] ?? now()->format('Y-m-d'),
+                ]);
+
+                // Balasan langsung dari persona (biasanya di funcCall terakhir)
+                if (isset($params['result'])) {
+                    $finalReply = $this->agentChat->agentPersonaChat($params['result'], null);
+                }
+            } elseif ($functionName === 'finance_analyze_chat') {
+                $context = $params[0] ?? $userMessage;
+
+                // Dapatkan query SQL dari Finance Analyzer
+                $financeQueries = $this->agentChat->agentFinanceAnalyze($context);
+
+                $analysisResults = [];
+                foreach ($financeQueries as $q) {
+                    // ✅ Tambahkan filter device_id ke setiap query
+                    $sql = $this->injectDeviceIdFilter($q['sql'], $deviceId);
+                    $data = DB::select($sql);
+                    $analysisResults[] = [
+                        'data' => $data,
+                        'reason' => $q['reason'],
+                    ];
+                }
+
+                // Format hasil untuk Persona
+                $insightText = $this->formatFinanceResultsForPersona($analysisResults);
+
+                // ✅ Kirim insight ke Persona Chat untuk diubah jadi bahasa Indonesia ramah
+                $finalReply = $this->agentChat->agentPersonaChat($insightText, null);
+            } elseif ($functionName === 'persona_chat') {
+                // Biasanya ini fallback atau reply langsung
+                $reason = $params['reason'] ?? 'Tidak ada penjelasan.';
+                $finalReply = $this->agentChat->agentPersonaChat($reason, null);
+            }
         }
 
-        return [
-            'device'   => $device,
-            'messages' => Message::where('device_id', $device->id)->orderBy('created_at')->get(),
-        ];
+        // 4. Simpan balasan agen
+        Message::create([
+            'from' => 'agent',
+            'to' => $deviceId,
+            'body' => $finalReply,
+        ]);
+    }
+
+    /**
+     * Suntikkan `WHERE device_id = ?` ke query SQL untuk keamanan.
+     */
+    private function injectDeviceIdFilter(string $sql, string $deviceId): string
+    {
+        // Pastikan hanya query SELECT
+        if (!preg_match('/^\s*SELECT/i', $sql)) {
+            throw new \InvalidArgumentException('Hanya query SELECT yang diizinkan.');
+        }
+
+        // Tambahkan WHERE device_id = ?
+        if (stripos($sql, 'WHERE') !== false) {
+            $sql = preg_replace('/\bWHERE\b/i', "WHERE device_id = '$deviceId' AND", $sql, 1);
+        } else {
+            $sql .= " WHERE device_id = '$deviceId'";
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Ubah hasil query jadi teks ringkas untuk Persona Chat.
+     */
+    private function formatFinanceResultsForPersona(array $results): string
+    {
+        if (empty($results)) {
+            return 'Tidak ada data keuangan ditemukan.';
+        }
+
+        $lines = [];
+        foreach ($results as $r) {
+            $data = $r['data'];
+            if (empty($data)) {
+                continue;
+            }
+
+            // Ambil baris pertama dan kolom apa saja
+            $row = (array) $data[0];
+            if (count($row) === 1) {
+                $value = reset($row);
+                $lines[] = (string) $value;
+            } else {
+                $lines[] = json_encode($row, JSON_UNESCAPED_UNICODE);
+            }
+        }
+
+        return implode("\n", $lines) ?: 'Tidak ada data yang sesuai.';
     }
 }

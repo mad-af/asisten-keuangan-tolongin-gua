@@ -16,38 +16,21 @@ class ChatController extends Controller
 
     public function __construct(protected MessageService $messageService) {}
 
-    public function index(Request $request)
+    public function index()
     {
-        $device = null;
-        $messages = [];
 
-        if ($request->device_id) {
-            $device = Device::find($request->device_id);
-
-            if ($device) {
-                $messages = Message::where('device_id', $device->id)
-                    ->orderBy('created_at')
-                    ->get();
-            }
-        }
-
-        return Inertia::render('Chat/Index', [
-            'device' => $device,
-            'messages' => $messages,
-        ]);
+        return Inertia::render('Chat/Index');
     }
 
     public function sendMessage(Request $request)
     {
-        $request->validate([
-            'device_id' => 'required|string',
-            'message' => 'required|string',
-        ]);
+        $this->messageService->send($request);
 
-        $result = $this->messageService->message($request);
+        return redirect()->route('chat.index');
+    }
 
-        return redirect()->route('chat.index', [
-            'device_id' => $result['device']->id,
-        ]);
+    public function getMessages($device_id)
+    {
+        return Message::where('from', $device_id)->orWhere('to', $device_id)->orderBy('created_at', 'asc')->get();
     }
 }

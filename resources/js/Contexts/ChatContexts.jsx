@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 const ChatContext = createContext();
 
@@ -6,8 +7,13 @@ export const ChatProvider = ({ children }) => {
     const [deviceId, setDeviceId] = useState(null);
 
     useEffect(() => {
-        const id = localStorage.getItem("device_id");
-        setDeviceId(id);
+        let idDevice = localStorage.getItem('device_id');
+
+        if (!idDevice) {
+            idDevice = uuidv4();
+            localStorage.setItem('device_id', idDevice);
+        }
+        setDeviceId(idDevice);
     }, []);
 
     return (
