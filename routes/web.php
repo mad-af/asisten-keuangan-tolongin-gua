@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\KolosalChatController;
@@ -19,3 +20,8 @@ Route::get('/', function () {
 
 Route::get('/test', [TestController::class, 'index'])->name('test.index');
 Route::post('/kolosal/chat', [KolosalChatController::class, 'completions'])->name('kolosal.chat');
+
+Route::controller(ChatController::class)->group(function () {
+    Route::get('/chat', 'index')->name('chat.index');
+    Route::post('/chat/send', 'sendMessage')->name('chat.send');
+});
