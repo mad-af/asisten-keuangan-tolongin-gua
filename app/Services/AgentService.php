@@ -20,6 +20,7 @@ class AgentService
             
         } catch (\Throwable $th) {
             Log::error('AgentService::chat error', ['exception' => $th->getMessage(), 'trace' => $th->getTraceAsString()]);
+            return ['data' => null];
         } finally {
             return ['data' => $data];
         }
