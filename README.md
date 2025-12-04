@@ -1,9 +1,9 @@
 <p align="center"><img src="public/assets/logo.webp" width="250" alt="Project Logo"></p>
 
 <p align="center">
-  <a>
+  <span>
     <img src="https://img.shields.io/badge/coverage-110%25-brightgreen" alt="imphnen (Organizer)">
-  </a>
+  </span>
   <a href="https://www.facebook.com/groups/1032515944638255">
     <img src="https://img.shields.io/badge/imphnen-Organizer-blueviolet" alt="imphnen (Organizer)">
   </a>
@@ -18,7 +18,15 @@
 
 ## Tentang
 
+AKTG (Asisten Keuangan Tolongin Gua) adalah asisten pembukuan berbasis percakapan untuk pelaku usaha lokal — membantu pencatatan pemasukan/pengeluaran, ringkasan, dan insight singkat secara mudah. Banyak UMKM belum memiliki pembukuan memadai: ~74% tidak bisa membuat laporan keuangan formal ([Media Indonesia, 2025](https://epaper.mediaindonesia.com/detail/74-umkm-tidak-bisa-buat-laporan-keuangan)), ~80% masih mencatat manual ([OCBC Business Fitness Index 2023 via Emiten News](https://emitennews.com/news/80-pelaku-umkm-indonesia-masih-melakukan-pencatatan-keuangan-secara-manual)), dan hanya ±46% yang memisahkan keuangan bisnis/pribadi ([Neraca](https://www.neraca.co.id/article/204139/hanya-46-umkm-yang-pisahkan-keuangan-bisnis-dan-personal-riset-ocbc-business-fitness-index)).
 
+Asistan ini berjalan dalam simulasi WhatsApp agar langsung menyasar kebiasaan pengguna dan memudahkan adopsi. Melalui chat, pengguna dapat mencatat pemasukan/pengeluaran, melihat ringkasan keuangan, dan mendapatkan insight singkat tanpa perlu memahami istilah akuntansi yang rumit.
+
+## Fitur Utama
+
+- Pencatatan transaksi
+- Ringkasan harian/mingguan
+- Mudah dipakai tanpa pengetahuan akuntansi
 
 ## Tech Stack
 
@@ -88,6 +96,6 @@ php artisan view:cache
 - 🏹 Frontend Ranger of React Woods: [@appledark-corei9XH](https://github.com/appledark-corei9XH)
 
 
-## License
+## Lisensi
 
 Aplikasi "Asisten Keuangan Tolongin Gua" ini dirilis di bawah lisensi [MIT](https://opensource.org/licenses/MIT).
