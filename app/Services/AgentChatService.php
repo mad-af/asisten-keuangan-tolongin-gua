@@ -115,6 +115,55 @@ End.
         return $messages;
     }
 
+    private function newAgentFinanceAnalyzeMessages(string $context, string $deviceId): array
+    {
+        return [
+            [
+                'role' => 'system',
+                'content' => "
+You are the Finance Analyzer. Be extremely concise.
+
+Your job is to generate SQL queries to answer financial questions based on the user's data.
+
+CRITICAL RULES:
+- You have READ-ONLY access to the `transactions` table.
+- The user's device_id is: {$deviceId}
+- EVERY query MUST include `WHERE device_id = '{$deviceId}'` to isolate data.
+- NEVER return data from other users.
+
+Table schema:
+- transactions(id, device_id, type, amount, note, date)
+- type: 'IN' or 'OUT'
+- amount: integer
+- date: string in YYYY-MM-DD format
+
+Instructions:
+1. Interpret the 'context' and generate ONLY the necessary SELECT queries.
+2. Each query must filter by device_id = '{$deviceId}'.
+3. Use today's date as " . date('Y-m-d') . " when 'today' is mentioned.
+4. Output format (strictly):
+
+[N]{sql;reason}:
+    SQL_QUERY_1;brief reason
+    SQL_QUERY_2;brief reason
+
+- N = number of queries
+- No extra text before/after
+- No explanations, no markdown, no JSON
+- Only valid SQL that can run on SQLite/MySQL
+
+Example:
+[1]{sql;reason}:
+    SELECT SUM(amount) FROM transactions WHERE device_id = '{$deviceId}' AND type = 'OUT' AND date = '2025-12-05'; total pengeluaran hari ini
+            ",
+            ],
+            [
+                'role' => 'user',
+                'content' => $context,
+            ],
+        ];
+    }
+
     private function agentFinanceAnalyzeMessages(string $message): array
     {
         $messages = [
@@ -205,6 +254,14 @@ End.
         return $this->chatClient->chatCompletions([
             'max_tokens' => 1000,
             'messages' => $this->agentFinanceAnalyzeMessages($message),
+        ])->messageContent();
+    }
+
+    public function newAgentFinanceAnalyzeChat(string $context, string $deviceId): string
+    {
+        return $this->chatClient->chatCompletions([
+            'max_tokens' => 1000,
+            'messages' => $this->newAgentFinanceAnalyzeMessages($context, $deviceId),
         ])->messageContent();
     }
 

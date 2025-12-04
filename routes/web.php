@@ -23,5 +23,6 @@ Route::post('/kolosal/chat', [KolosalChatController::class, 'completions'])->nam
 
 Route::controller(ChatController::class)->group(function () {
     Route::get('/chat', 'index')->name('chat.index');
+    Route::get('/messages/{device_id}', 'getMessages')->name('chat.messages');
     Route::post('/chat/send', 'sendMessage')->name('chat.send');
 });

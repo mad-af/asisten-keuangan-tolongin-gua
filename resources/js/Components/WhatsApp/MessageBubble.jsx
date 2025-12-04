@@ -1,5 +1,8 @@
+import { useChat } from "../../Contexts/ChatContexts";
+
 export default function MessageBubble({ msg }) {
-    const isMe = msg.from === "me";
+    const { deviceId } = useChat();
+    const isMe = msg.from === deviceId;
 
     return (
         <div className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
@@ -10,7 +13,7 @@ export default function MessageBubble({ msg }) {
                         : "bg-base-300 rounded-bl-none"
                 }`}
             >
-                {msg.text}
+                {msg.body}
             </div>
         </div>
     );
