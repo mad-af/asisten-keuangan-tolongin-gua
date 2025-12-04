@@ -132,17 +132,15 @@ class AgentToolService
         ]);
     }
 
-    protected function persona_chat(string $reason)
+    protected function persona_chat(string $reason, ?array $premessages): string
     {
-        logger()->info('persona_chat', [
-            'message' => $reason,
-        ]);
+        return $this->agentChat->agentPersonaChat($reason, $premessages);
     }
 
     protected function finance_analyze_chat(string $context)
     {
-        logger()->info('finance_analyze_chat', [
-            'context' => $context,
-        ]);
+        $financeAnalyze = $this->agentChat->agentFinanceAnalyze($context);
+
+        return $financeAnalyze;
     }
 }

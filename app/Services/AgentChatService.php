@@ -56,7 +56,7 @@ End.
         ];
     }
 
-    private function agentPersonaMessages(?string $message): array
+    private function agentPersonaMessages(?string $message, ?array $premessages): array
     {
         $messages = [
             [
@@ -94,6 +94,14 @@ End.
                 ',
             ],
         ];
+
+        if ($premessages !== null) {
+            $messages = array_map(function ($msg) {
+                $msg['role'] = 'assistant';
+                return $msg;
+            }, $premessages);
+            $messages = array_merge($messages, $messages);
+        }
 
         if ($message !== null) {
             $messages[] = [
@@ -182,11 +190,11 @@ End.
         ])->messageContent();
     }
 
-    public function agentPersonaChat(?string $message): string
+    public function agentPersonaChat(string $message, ?array $premessages): string
     {
         return $this->chatClient->chatCompletions([
             'max_tokens' => 1000,
-            'messages' => $this->agentPersonaMessages($message),
+            'messages' => $this->agentPersonaMessages($message, $premessages),
         ])->messageContent();
     }
 
