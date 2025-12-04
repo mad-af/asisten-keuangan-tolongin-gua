@@ -2,24 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\KolosalApiClient;
+use App\Services\AgentService;
 use Illuminate\Http\Request;
 
 class KolosalChatController extends Controller
 {
-    public function __construct(protected KolosalApiClient $client) {}
+    public function __construct(protected AgentService $agent) {}
 
     public function completions(Request $request)
     {
-        $payload = $request->only(['messages', 'max_tokens']);
-        $result = $this->client->chatCompletions($payload);
+        $message = (string) ($request->input('message') ?? '');
 
-        return response()->json([
-            'ok' => $result->isOk(),
-            'status' => $result->status,
-            'response' => $result->getData(),
-            'error' => $result->getError(),
-            'meta' => $result->meta,
-        ], $result->status);
+        $result = $this->agent->chat($message);
+
+        return response()->json($result, $result['status'] ?? 200);
     }
 }

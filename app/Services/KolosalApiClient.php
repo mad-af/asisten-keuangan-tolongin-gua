@@ -200,4 +200,18 @@ class ChatResponse
 
         return $out;
     }
+
+    public function messageContent(): ?string
+    {
+        $messages = $this->messages();
+        if (count($messages) === 0) {
+            return null;
+        }
+        $content = $messages[0]['content'] ?? null;
+        if (is_string($content)) {
+            return $content;
+        }
+
+        return null;
+    }
 }
