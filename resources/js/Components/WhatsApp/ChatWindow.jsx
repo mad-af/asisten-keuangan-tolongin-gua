@@ -51,10 +51,10 @@ export default function ChatWindow() {
             <div className="p-4 bg-base-300 border-b border-base-300 flex items-center gap-3">
                 <div className="avatar">
                     <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                        <img src="https://ui-avatars.com/api/?name=Budi" alt="avatar" />
+                        <img src="https://ui-avatars.com/api/?name=AsistenKeuangan" alt="avatar" />
                     </div>
                 </div>
-                <h2 className="font-semibold text-lg">Budi</h2>
+                <h2 className="font-semibold text-lg">Asisten Keuangan Tolongin Gue</h2>
             </div>
 
             {/* Messages */}

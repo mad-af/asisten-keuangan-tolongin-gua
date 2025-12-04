@@ -27,7 +27,7 @@ Available functions:
 Date rules:
 - Use ISO date format YYYY-MM-DD for all date parameters.
 - If user omits date, default to today's date in YYYY-MM-DD.
-- Acknowledge that your training data is not current. The current date is ".date('Y-m-d').". Always use this date when referring to 'today'
+- Acknowledge that your training data is not current. The current date is " . date('Y-m-d') . ". Always use this date when referring to 'today'
 
 Decision rules (priority):
 1. If user requests DB read/write, charts, or computations -> choose functions (tool).
@@ -141,7 +141,7 @@ Responsibilities:
 Rules:
 - Only SELECT queries allowed.
 - Use ISO dates (YYYY-MM-DD) when filtering.
-- Acknowledge that your training data is not current. The current date is ".date('Y-m-d').". Always use this date when referring to 'today'
+- Acknowledge that your training data is not current. The current date is " . date('Y-m-d') . ". Always use this date when referring to 'today'
 - Keep reasoning short and precise.
 - Output MUST follow this exact custom format (no JSON):
 
@@ -287,7 +287,6 @@ End.
         }
 
         return $queries;
-
     }
 
     protected function retry(callable $fn, int $maxRetries = 2, int $delayMs = 200)

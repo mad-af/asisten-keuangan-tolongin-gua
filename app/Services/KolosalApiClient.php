@@ -27,7 +27,7 @@ class KolosalApiClient
     protected function headers(): array
     {
         return [
-            'Authorization' => 'Bearer '.$this->apiKey,
+            'Authorization' => 'Bearer ' . $this->apiKey,
             'Content-Type' => 'application/json',
         ];
     }
@@ -53,7 +53,7 @@ class KolosalApiClient
         $payload['model'] = $this->model;
 
         $res = Http::withHeaders($this->headers())
-            ->post($this->baseUrl.'/v1/chat/completions', $payload);
+            ->post($this->baseUrl . '/v1/chat/completions', $payload);
 
         $elapsed = $this->elapsedMs($start);
         $reqId = $res->header('x-request-id') ?? null;
