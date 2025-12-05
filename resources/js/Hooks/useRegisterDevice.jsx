@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { getOrCreateDeviceId } from "../utils/device.js";
 
@@ -8,6 +8,14 @@ export function useRegisterDevice({ onSuccess } = {}) {
     const [loadingDummy, setLoadingDummy] = useState(false);
     const [error, setError] = useState("");
     const [loadingEnter, setLoadingEnter] = useState(false);
+
+    useEffect(() => {
+        try {
+            const existing = localStorage.getItem("device_name");
+            if (existing && !name) setName(existing);
+        } catch {}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const saveDeviceLocal = (device) => {
         try {
@@ -64,15 +72,17 @@ export function useRegisterDevice({ onSuccess } = {}) {
         setError("");
         setLoadingDummy(true);
         try {
+            const device_id = getOrCreateDeviceId();
+            const trimmed = (name || "").trim();
             const res = await axios.post(
                 "/api/devices/dummy",
-                {},
+                { device_id, device_name: trimmed || "Dummy User" },
                 { withCredentials: true }
             );
             const data = res?.data ?? {};
             const device = {
-                device_id: data?.device_id ?? "dummy-device",
-                device_name: data?.device_name ?? "Dummy User",
+                device_id: data?.device_id ?? device_id,
+                device_name: data?.device_name ?? (trimmed || "Dummy User"),
                 token: data?.token ?? "dummy-token",
             };
             saveDeviceLocal(device);

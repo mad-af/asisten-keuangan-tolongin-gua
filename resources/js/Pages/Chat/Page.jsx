@@ -3,12 +3,16 @@ import AppLayout from "../../Layouts/AppLayout.jsx";
 import { v4 as uuidv4 } from "uuid";
 import { router } from "@inertiajs/react";
 import ChatWindow from "../../Components/chat/ChatWindow.jsx";
+import DeviceOnboardForm from "../../Components/presentational/DeviceOnboardForm.jsx";
+import { useRegisterDevice } from "../../Hooks/useRegisterDevice.jsx";
 
 const Index = () => {
     const [deviceId, setDeviceId] = useState("");
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const listRef = useRef(null);
+
+    const [needName, setNeedName] = useState(false);
 
     useEffect(() => {
         const existing =
@@ -22,6 +26,11 @@ const Index = () => {
             localStorage.setItem("device_id", id);
             setDeviceId(id);
         }
+        const displayName =
+            typeof window !== "undefined"
+                ? localStorage.getItem("device_name")
+                : null;
+        setNeedName(!(displayName && displayName.trim() !== ""));
     }, []);
 
     useEffect(() => {
@@ -69,7 +78,23 @@ const Index = () => {
         );
     };
 
-    return (
+    const { name, setName, loadingEnter, error, handleEnter } = useRegisterDevice({
+        onSuccess: () => router.visit("/choose-your-setup"),
+    });
+
+    return needName ? (
+        <div className="relative h-full">
+            <div className="absolute inset-0 flex items-center justify-center p-4">
+                <DeviceOnboardForm
+                    name={name}
+                    setName={setName}
+                    error={error}
+                    loadingEnter={loadingEnter}
+                    onEnter={handleEnter}
+                />
+            </div>
+        </div>
+    ) : (
         <div
             className="relative h-full"
             style={{

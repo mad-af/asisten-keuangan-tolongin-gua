@@ -1,9 +1,10 @@
 import { router } from "@inertiajs/react";
+import { useRegisterDevice } from "../../Hooks/useRegisterDevice.jsx";
 
 export default function ChooseSetup() {
-    const choose = (option) => {
-        router.post("/setup/select", { option });
-    };
+    const { handleNewSetup, handleDummySetup, loading, error, name } = useRegisterDevice({
+        onSuccess: () => router.visit("/chat"),
+    });
 
     return (
         <div className="card w-full max-w-sm bg-base-100 shadow">
@@ -18,16 +19,21 @@ export default function ChooseSetup() {
                 <div className="space-y-3">
                     <button
                         className="btn btn-primary w-full"
-                        onClick={() => choose("new")}
+                        onClick={handleNewSetup}
+                        disabled={loading}
                     >
-                        Mulai Akun Baru
+                        {loading ? "Memproses…" : "Mulai Akun Baru"}
                     </button>
                     <button
                         className="btn w-full"
-                        onClick={() => choose("dummy")}
+                        onClick={handleDummySetup}
+                        disabled={loading}
                     >
-                        Pakai Data Dummy
+                        {loading ? "Memproses…" : "Pakai Data Dummy"}
                     </button>
+                    {error && (
+                        <div className="text-error text-xs mt-1">{error}</div>
+                    )}
                     <div className="p-2 bg-info/5 border border-info/10 rounded-md">
                         <span className="text-xs text-info-content font-semibold block">Catatan:</span>
                         <span className="text-xs text-info-content block">
