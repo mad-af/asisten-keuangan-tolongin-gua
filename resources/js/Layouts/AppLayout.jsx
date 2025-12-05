@@ -30,7 +30,7 @@ export default function AppLayout({ children }) {
                     <Breadcrumbs />
                 </nav>
                 {/* Page content here */}
-                <div className="grow w-full bg-base-100">{children}</div>
+                <div className="grow w-full">{children}</div>
             </div>
 
             <div className="drawer-side">
