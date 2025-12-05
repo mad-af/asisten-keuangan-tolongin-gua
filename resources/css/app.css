@@ -15,7 +15,7 @@
 @plugin "daisyui/theme" {
   name: "winter";
   default: true;
-  prefersdark: false;
+  prefersdark: true;
   color-scheme: "dark";
   --color-base-100: oklch(98% 0.003 247.858);
   --color-base-200: oklch(96% 0.007 247.896);

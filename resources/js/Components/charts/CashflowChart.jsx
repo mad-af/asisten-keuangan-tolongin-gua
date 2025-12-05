@@ -95,7 +95,7 @@ export default function CashflowChart({ transactions = [], height = 240 }) {
 
     return (
         <div className="mb-4">
-            <div className="text-lg font-semibold mb-2">Cashflow</div>
+            <div className="font-medium mb-2">Cashflow</div>
             <div style={{ height }}>
                 <Line data={data} options={options} />
             </div>

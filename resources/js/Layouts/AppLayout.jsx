@@ -17,7 +17,7 @@ export default function AppLayout({ children }) {
             />
             <div className="flex flex-col drawer-content m-1 md:m-2 md:ml-0.5 bg-base-100 rounded-md shadow-lg">
                 {/* Navbar */}
-                <nav className="navbar w-full min-h-8">
+                <nav className="navbar w-full min-h-8 sticky top-0 z-10 bg-base-100 border-b border-base-300">
                     <label
                         htmlFor="my-drawer-4"
                         aria-label="open sidebar"
@@ -33,7 +33,7 @@ export default function AppLayout({ children }) {
                 <div className="grow w-full">{children}</div>
             </div>
 
-            <div className="drawer-side">
+            <div className="drawer-side z-20">
                 <label
                     htmlFor="my-drawer-4"
                     aria-label="close sidebar"
