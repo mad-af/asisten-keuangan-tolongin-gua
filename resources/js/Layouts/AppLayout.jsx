@@ -1,4 +1,3 @@
-
 import AppSidebar from "../Components/navigation/AppSidebar.jsx";
 
 export default function AppLayout({ children }) {
@@ -8,14 +7,14 @@ export default function AppLayout({ children }) {
                 id="my-drawer-4"
                 type="checkbox"
                 className="drawer-toggle"
-                checked
+                defaultChecked
             />
             <div className="drawer-content m-2 ml-0.5 bg-base-100 rounded-md shadow-lg">
                 {/* Page content here */}
                 <div className="p-4">Page Content</div>
             </div>
 
-            <div className="drawer-side is-drawer-close:overflow-visible">
+            <div className="drawer-side overflow-visible">
                 <label
                     htmlFor="my-drawer-4"
                     aria-label="close sidebar"
