@@ -8,7 +8,7 @@ import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 export default function InputBar({ message, onChange, onSend }) {
     return (
         <div className="w-full absolute bottom-0">
-            <div className="p-2">
+            <div className="p-2 pt-0">
                 <div className="flex items-center gap-2 w-full bg-white rounded-full p-1 shadow-sm">
                     <button className="btn btn-ghost btn-circle btn-md w-10 h-10">
                         <FaceSmileIcon className="size-5" />

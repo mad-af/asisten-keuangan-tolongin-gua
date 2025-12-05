@@ -28,7 +28,7 @@ export default function ChatWindow({
     }, [messages]);
 
     return (
-        <div className="h-full w-full flex flex-col">
+        <div className="grow w-full flex flex-col">
             <div
                 ref={listRef}
                 className="flex-1 max-h-11/12 min-h-11/12 overflow-y-auto px-2 py-4"
