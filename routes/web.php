@@ -14,6 +14,10 @@ Route::get('/choose-your-setup', function () {
     return Inertia::render('ChooseYourSetup/Page');
 });
 
+Route::get('/chat', function () {
+    return Inertia::render('Chat/Page');
+});
+
 Route::post('/enter', function () {
     $name = request('name');
     if (is_string($name) && $name !== '') {
@@ -27,7 +31,7 @@ Route::get('/test', [TestController::class, 'index'])->name('test.index');
 Route::post('/kolosal/chat', [KolosalChatController::class, 'completions'])->name('kolosal.chat');
 
 Route::controller(ChatController::class)->group(function () {
-    Route::get('/chat', 'index')->name('chat.index');
+    // Route::get('/chat', 'index')->name('chat.index');
     Route::get('/messages/{device_id}', 'getMessages')->name('chat.messages');
     Route::post('/chat/send', 'sendMessage')->name('chat.send');
 });
