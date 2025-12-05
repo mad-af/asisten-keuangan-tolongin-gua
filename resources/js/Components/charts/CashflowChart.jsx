@@ -21,7 +21,7 @@ ChartJS.register(
     Filler
 );
 
-export default function CashflowChart({ transactions = [], height = 240 }) {
+export default function CashflowChart({ transactions = [], series, height = 240 }) {
     const sample = useMemo(() => {
         if (Array.isArray(transactions) && transactions.length)
             return transactions;
@@ -41,6 +41,7 @@ export default function CashflowChart({ transactions = [], height = 240 }) {
     }, [transactions]);
 
     const { labels, inData, outData } = useMemo(() => {
+        if (series && Array.isArray(series.labels)) return series;
         const byDate = new Map();
         for (const t of sample) {
             const d = (t.date || "").slice(0, 10);
@@ -53,7 +54,7 @@ export default function CashflowChart({ transactions = [], height = 240 }) {
         const inData = labels.map((d) => byDate.get(d).IN);
         const outData = labels.map((d) => byDate.get(d).OUT);
         return { labels, inData, outData };
-    }, [sample]);
+    }, [sample, series]);
 
     const data = {
         labels,

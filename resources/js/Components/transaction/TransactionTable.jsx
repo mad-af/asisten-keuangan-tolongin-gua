@@ -19,10 +19,11 @@ export default function TransactionTable({ data = [], headerLeft }) {
             render: (row) => (
                 <span
                     className={`badge badge-sm ${
-                        row.type === "IN" ? "badge-success" : "badge-error"
+                        row.type_badge ||
+                        (row.type === "IN" ? "badge-success" : "badge-error")
                     }`}
                 >
-                    {row.type}
+                    {row.type_label || row.type}
                 </span>
             ),
         },
@@ -31,7 +32,8 @@ export default function TransactionTable({ data = [], headerLeft }) {
             render: (row) => (
                 <span
                     className={
-                        row.type === "IN" ? "text-success" : "text-error"
+                        row.type_text_class ||
+                        (row.type === "IN" ? "text-success" : "text-error")
                     }
                 >
                     {row.type === "IN" ? "+" : "-"}
@@ -50,6 +52,9 @@ export default function TransactionTable({ data = [], headerLeft }) {
             id,
             device_id: "sample-device",
             type: isIn ? "IN" : "OUT",
+            type_label: isIn ? "Pemasukan" : "Pengeluaran",
+            type_badge: isIn ? "badge-success" : "badge-error",
+            type_text_class: isIn ? "text-success" : "text-error",
             amount: isIn ? 100000 + i * 1000 : 50000 + i * 500,
             note: isIn ? "Pemasukan contoh" : "Pengeluaran contoh",
             date: `2025-12-${day}`,

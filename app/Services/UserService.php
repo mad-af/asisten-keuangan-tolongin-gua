@@ -54,7 +54,7 @@ class UserService
         $user->save();
 
         if ($type === 'dummy') {
-            $this->seedDummyTransactions($user->id, 6);
+            $this->seedDummyTransactions((string) $user->id, 6);
         }
 
         return $user;

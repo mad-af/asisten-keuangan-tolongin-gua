@@ -1,19 +1,17 @@
-import React, { useEffect } from "react";
+import React from "react";
 import AppLayout from "../../Layouts/AppLayout.jsx";
 import TransactionTable from "../../Components/transaction/TransactionTable.jsx";
 import CashflowChart from "../../Components/charts/CashflowChart.jsx";
 import { useUserApi } from "../../Hooks/useUserApi.jsx";
+import { useTransactionsApi } from "../../Hooks/useTransactionsApi.jsx";
 
 const Index = () => {
-    const { me, loadingMe, fetchMe } = useUserApi();
-
-    useEffect(() => {
-        fetchMe();
-    }, [fetchMe]);
+    const { me } = useUserApi();
+    const { transactions, cashflow } = useTransactionsApi();
 
     return (
         <div className="h-full w-full p-4">
-            <CashflowChart />
+            <CashflowChart series={cashflow} transactions={transactions} />
             <div className="divider"></div>
             <TransactionTable
                 headerLeft={
@@ -21,6 +19,7 @@ const Index = () => {
                         Riwayat Transaksi{me?.name ? ` • ${me.name}` : ""}
                     </div>
                 }
+                data={transactions}
             />
         </div>
     );
