@@ -12,4 +12,10 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    optimizeDeps: {
+        include: ["react-chartjs-2", "chart.js"],
+    },
+    server: {
+        cors: true,
+    },
 });
