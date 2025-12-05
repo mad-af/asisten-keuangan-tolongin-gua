@@ -21,29 +21,15 @@ ChartJS.register(
     Filler
 );
 
-export default function CashflowChart({ transactions = [], series, height = 240 }) {
-    const sample = useMemo(() => {
-        if (Array.isArray(transactions) && transactions.length)
-            return transactions;
-        return Array.from({ length: 20 }, (_, i) => {
-            const id = i + 1;
-            const isIn = id % 2 === 1;
-            const day = String((i % 28) + 1).padStart(2, "0");
-            return {
-                id,
-                device_id: "sample-device",
-                type: isIn ? "IN" : "OUT",
-                amount: isIn ? 100000 + i * 2000 : 60000 + i * 1200,
-                note: isIn ? "Pemasukan contoh" : "Pengeluaran contoh",
-                date: `2025-12-${day}`,
-            };
-        });
-    }, [transactions]);
-
+export default function CashflowChart({
+    transactions = [],
+    series,
+    height = 240,
+}) {
     const { labels, inData, outData } = useMemo(() => {
         if (series && Array.isArray(series.labels)) return series;
         const byDate = new Map();
-        for (const t of sample) {
+        for (const t of transactions) {
             const d = (t.date || "").slice(0, 10);
             if (!byDate.has(d)) byDate.set(d, { IN: 0, OUT: 0 });
             const acc = byDate.get(d);
@@ -54,7 +40,7 @@ export default function CashflowChart({ transactions = [], series, height = 240 
         const inData = labels.map((d) => byDate.get(d).IN);
         const outData = labels.map((d) => byDate.get(d).OUT);
         return { labels, inData, outData };
-    }, [sample, series]);
+    }, [transactions, series]);
 
     const data = {
         labels,
