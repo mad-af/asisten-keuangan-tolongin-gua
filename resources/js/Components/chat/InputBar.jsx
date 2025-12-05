@@ -21,7 +21,7 @@ export default function InputBar({
     return (
         <div className="w-full">
             <div className="p-2 pt-0">
-                <div className="flex items-end gap-2 w-full bg-white rounded-3xl p-1 shadow-sm">
+                <div className="flex items-end gap-1 w-full bg-white rounded-3xl p-1 shadow-sm">
                     <button
                         className="btn btn-ghost btn-circle btn-md w-10 h-10"
                         disabled

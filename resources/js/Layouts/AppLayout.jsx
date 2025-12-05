@@ -5,8 +5,35 @@ import {
     ArrowRightStartOnRectangleIcon,
     Bars3Icon,
 } from "@heroicons/react/24/outline";
+import { useEffect } from "react";
+import { router } from "@inertiajs/react";
 
 export default function AppLayout({ children }) {
+    useEffect(() => {
+        const getCookie = (name) =>
+            typeof document !== "undefined"
+                ? document.cookie
+                      .split(";")
+                      .map((c) => c.trim())
+                      .find((c) => c.startsWith(name + "="))
+                : null;
+        const tokenCookie = getCookie("user_token");
+        const setupType =
+            typeof localStorage !== "undefined"
+                ? localStorage.getItem("setup_type")
+                : null;
+        const isSetupEmpty =
+            setupType == null || setupType === "null" || setupType.trim() === "";
+        if (!tokenCookie) {
+            router.visit("/");
+            return;
+        }
+        if (isSetupEmpty) {
+            router.visit("/choose-your-setup");
+            return;
+        }
+    }, []);
+
     return (
         <div className="drawer min-h-screen lg:drawer-open bg-base-200">
             <input

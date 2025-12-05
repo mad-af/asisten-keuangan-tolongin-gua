@@ -4,12 +4,29 @@ import {
     DocumentCurrencyDollarIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
-import { usePage, Link } from "@inertiajs/react";
+import { usePage, Link, router } from "@inertiajs/react";
+import { useEffect, useState } from "react";
 import Avatar from "../ui/Avatar.jsx";
 import Logo from "../ui/Logo.jsx";
 
 export default function AppSidebar({ items }) {
     const { user } = usePage().props ?? {};
+    const [displayName, setDisplayName] = useState(user?.name ?? "Guest");
+
+    useEffect(() => {
+        try {
+            const localName = localStorage.getItem("user_name");
+            if (localName) setDisplayName(localName);
+            else {
+                fetch("/api/users/me", { credentials: "include" })
+                    .then((r) => (r.ok ? r.json() : null))
+                    .then((me) => {
+                        if (me?.name) setDisplayName(me.name);
+                    })
+                    .catch(() => {});
+            }
+        } catch {}
+    }, [user]);
     const defaultItems = [
         {
             label: "Chat",
@@ -81,20 +98,15 @@ export default function AppSidebar({ items }) {
                             rounded={false}
                             className="rounded-md"
                             dicebear={{
-                                seed: user?.name ?? "Guest",
+                                seed: displayName ?? "Guest",
                                 backgroundType: "solid",
                                 radius: 0,
                             }}
                         />
                         <div className="min-w-0 is-drawer-close:hidden">
                             <div className="text-sm font-medium truncate">
-                                {user?.name ?? "Guest"}
+                                {displayName ?? "Guest"}
                             </div>
-                            {user?.email && (
-                                <div className="text-xs opacity-60 truncate">
-                                    {user.email}
-                                </div>
-                            )}
                         </div>
                         <ChevronUpDownIcon className="size-4 ml-auto opacity-60 is-drawer-close:hidden" />
                     </button>
@@ -103,10 +115,31 @@ export default function AppSidebar({ items }) {
                         className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mb-2 z-50"
                     >
                         <li>
-                            <a className="text-error flex items-center gap-2">
+                            <button
+                                className="text-error flex items-center gap-2"
+                                onClick={() => {
+                                    try {
+                                        if (typeof document !== "undefined") {
+                                            document.cookie
+                                                .split(";")
+                                                .map((c) => c.trim())
+                                                .forEach((c) => {
+                                                    const [name] = c.split("=");
+                                                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+                                                });
+                                        }
+                                        if (
+                                            typeof localStorage !== "undefined"
+                                        ) {
+                                            localStorage.clear();
+                                        }
+                                    } catch {}
+                                    router.visit("/");
+                                }}
+                            >
                                 <TrashIcon className="size-4" />
                                 Hapus akun
-                            </a>
+                            </button>
                         </li>
                     </ul>
                 </div>

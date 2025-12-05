@@ -44,24 +44,7 @@ export default function TransactionTable({ data = [], headerLeft }) {
         { label: "Catatan", key: "note" },
     ];
 
-    const fallbackData = Array.from({ length: 50 }, (_, i) => {
-        const id = i + 1;
-        const isIn = id % 2 === 1;
-        const day = String((i % 28) + 1).padStart(2, "0");
-        return {
-            id,
-            device_id: "sample-device",
-            type: isIn ? "IN" : "OUT",
-            type_label: isIn ? "Pemasukan" : "Pengeluaran",
-            type_badge: isIn ? "badge-success" : "badge-error",
-            type_text_class: isIn ? "text-success" : "text-error",
-            amount: isIn ? 100000 + i * 1000 : 50000 + i * 500,
-            note: isIn ? "Pemasukan contoh" : "Pengeluaran contoh",
-            date: `2025-12-${day}`,
-        };
-    });
-
-    const rows = Array.isArray(data) && data.length ? data : fallbackData;
+    const rows = Array.isArray(data) ? data : [];
 
     return (
         <DynamicTable
