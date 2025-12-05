@@ -1,12 +1,15 @@
 import React from "react";
 import AppLayout from "../../Layouts/AppLayout.jsx";
+import TransactionTable from "../../Components/transaction/TransactionTable.jsx";
 
 const Index = () => {
     return (
-        <div className="h-screen w-full bg-base-200 flex items-center justify-center">
-            <div className="text-sm opacity-60">
-                Chat akan tersedia di sini.
-            </div>
+        <div className="h-full w-full p-4">
+            <TransactionTable
+                headerLeft={
+                    <div className="font-medium">Riwayat Transaksi</div>
+                }
+            />
         </div>
     );
 };
