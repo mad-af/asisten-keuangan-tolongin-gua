@@ -15,7 +15,7 @@ export default function AppLayout({ children }) {
                 className="drawer-toggle"
                 defaultChecked
             />
-            <div className="drawer-content m-1 md:m-2 md:ml-0.5 bg-base-100 rounded-md shadow-lg">
+            <div className="flex flex-col drawer-content m-1 md:m-2 md:ml-0.5 bg-base-100 rounded-md shadow-lg">
                 {/* Navbar */}
                 <nav className="navbar w-full min-h-8">
                     <label
@@ -30,7 +30,7 @@ export default function AppLayout({ children }) {
                     <Breadcrumbs />
                 </nav>
                 {/* Page content here */}
-                <div className="flex-1 w-full">{children}</div>
+                <div className="grow w-full bg-base-100">{children}</div>
             </div>
 
             <div className="drawer-side">
