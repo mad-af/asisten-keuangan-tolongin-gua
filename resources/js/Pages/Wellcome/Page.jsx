@@ -1,16 +1,28 @@
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import LoginLayout from "../../Layouts/LoginLayout.jsx";
-import EnterForm from "../../Components/forms/EnterForm.jsx";
+import DeviceOnboardForm from "../../Components/presentational/DeviceOnboardForm.jsx";
+import { useRegisterDevice } from "../../Hooks/useRegisterDevice.jsx";
 
-function TestPage() {
+function OnboardingContainer() {
+    const { name, setName, loadingEnter, error, handleEnter } =
+        useRegisterDevice({
+            onSuccess: () => router.visit("/choose-your-setup"),
+        });
+
     return (
         <>
-            <Head title="Masuk" />
-            <EnterForm />
+            <Head title="Onboarding" />
+            <DeviceOnboardForm
+                name={name}
+                setName={setName}
+                error={error}
+                loadingEnter={loadingEnter}
+                onEnter={handleEnter}
+            />
         </>
     );
 }
 
-TestPage.layout = (page) => <LoginLayout>{page}</LoginLayout>;
+OnboardingContainer.layout = (page) => <LoginLayout>{page}</LoginLayout>;
 
-export default TestPage;
+export default OnboardingContainer;
