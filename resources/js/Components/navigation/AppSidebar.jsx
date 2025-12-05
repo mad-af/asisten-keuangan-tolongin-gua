@@ -1,11 +1,12 @@
 import {
-    HomeIcon,
-    Cog6ToothIcon,
     ChatBubbleLeftRightIcon,
     ChevronUpDownIcon,
+    DocumentCurrencyDollarIcon,
+    TrashIcon,
 } from "@heroicons/react/24/outline";
-import { usePage } from "@inertiajs/react";
+import { usePage, Link } from "@inertiajs/react";
 import Avatar from "../ui/Avatar.jsx";
+import Logo from "../ui/Logo.jsx";
 
 export default function AppSidebar({ items }) {
     const { user } = usePage().props ?? {};
@@ -16,48 +17,58 @@ export default function AppSidebar({ items }) {
             href: "/chat",
             Icon: ChatBubbleLeftRightIcon,
         },
-        { label: "Settings", tip: "Settings", href: "#", Icon: Cog6ToothIcon },
+        {
+            label: "Transaksi",
+            tip: "Transaksi",
+            href: "/transactions",
+            Icon: DocumentCurrencyDollarIcon,
+        },
     ];
 
     const menu = Array.isArray(items) && items.length ? items : defaultItems;
 
     return (
-        <div className="flex min-h-screen h-full flex-col  w-full">
-            <ul className="menu w-full grow">
-                {menu.map(({ label, tip, href, Icon }, idx) => {
-                    const path =
-                        typeof window !== "undefined"
-                            ? window.location.pathname
-                            : "";
-                    const isActive =
-                        typeof href === "string" &&
-                        (path === href ||
-                            (href !== "/" && path.startsWith(href)));
-                    const itemCls = `is-drawer-close:tooltip is-drawer-close:tooltip-right rounded-md ${
-                        isActive
-                            ? "bg-primary text-primary-content"
-                            : "hover:bg-base-300"
-                    }`;
-                    const iconCls = `my-1.5 inline-block size-4 ${
-                        isActive ? "text-primary-content" : ""
-                    }`;
-                    return (
-                        <li key={idx}>
-                            <a
-                                href={href}
-                                className={itemCls}
-                                data-tip={tip}
-                                aria-current={isActive ? "page" : undefined}
-                            >
-                                <Icon className={iconCls} />
-                                <span className="is-drawer-close:hidden">
-                                    {label}
-                                </span>
-                            </a>
-                        </li>
-                    );
-                })}
-            </ul>
+        <div className="flex min-h-screen h-full flex-col w-full">
+            <div className="flex-1 flex flex-col items-center justify-start pt-44 pb-6">
+                <div className="w-full flex items-center justify-center p-4">
+                    <Logo width={140} />
+                </div>
+                <ul className="menu w-full gap-2">
+                    {menu.map(({ label, tip, href, Icon }, idx) => {
+                        const path =
+                            typeof window !== "undefined"
+                                ? window.location.pathname
+                                : "";
+                        const isActive =
+                            typeof href === "string" &&
+                            (path === href ||
+                                (href !== "/" && path.startsWith(href)));
+                        const itemCls = `is-drawer-close:tooltip is-drawer-close:tooltip-right rounded-md ${
+                            isActive
+                                ? "bg-primary text-primary-content"
+                                : "hover:bg-base-300"
+                        }`;
+                        const iconCls = `my-1.5 inline-block size-4 ${
+                            isActive ? "text-primary-content" : ""
+                        }`;
+                        return (
+                            <li key={idx}>
+                                <Link
+                                    href={href}
+                                    className={itemCls}
+                                    data-tip={tip}
+                                    aria-current={isActive ? "page" : undefined}
+                                >
+                                    <Icon className={iconCls} />
+                                    <span className="is-drawer-close:hidden">
+                                        {label}
+                                    </span>
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
 
             <div className="w-full p-2 border-t border-base-300 sticky bottom-0 bg-base-200 overflow-visible">
                 <div className="dropdown dropdown-right dropdown-end w-full">
@@ -90,7 +101,10 @@ export default function AppSidebar({ items }) {
                         className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 z-50"
                     >
                         <li>
-                            <a className="text-error">Hapus akun</a>
+                            <a className="text-error flex items-center gap-2">
+                                <TrashIcon className="size-4" />
+                                Hapus akun
+                            </a>
                         </li>
                     </ul>
                 </div>

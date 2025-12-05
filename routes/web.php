@@ -8,15 +8,19 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Wellcome/Page');
-});
+})->name('wellcome.index');
 
 Route::get('/choose-your-setup', function () {
     return Inertia::render('ChooseYourSetup/Page');
-});
+})->name('choose-your-setup.index');
 
 Route::get('/chat', function () {
     return Inertia::render('Chat/Page');
-});
+})->name('chat.index');
+
+Route::get('/transactions', function () {
+    return Inertia::render('Transaction/Page');
+})->name('transactions.index');
 
 Route::post('/enter', function () {
     $name = request('name');

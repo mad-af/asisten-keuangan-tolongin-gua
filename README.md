@@ -1,4 +1,4 @@
-<p align="center"><img src="public/assets/logo.webp" width="250" alt="Project Logo"></p>
+<p align="center"><img src="public/assets/aktg/logo.webp" width="250" alt="Project Logo"></p>
 
 <p align="center">
   <span>
