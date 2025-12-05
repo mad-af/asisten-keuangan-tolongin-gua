@@ -6,7 +6,7 @@ export default function Sidebar() {
     ];
 
     return (
-        <div className="w-80 bg-base-100 border-r border-base-300 flex flex-col">
+        <div className="w-80 bg-base-100 flex flex-col">
             {/* Header */}
             <div className="p-4 bg-base-300">
                 <h2 className="text-lg font-bold">WhatsApp Clone</h2>

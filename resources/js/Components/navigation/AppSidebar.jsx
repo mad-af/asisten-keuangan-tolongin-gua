@@ -70,21 +70,23 @@ export default function AppSidebar({ items }) {
                 </ul>
             </div>
 
-            <div className="w-full p-2 border-t border-base-300 sticky bottom-0 bg-base-200 overflow-visible">
-                <div className="dropdown dropdown-right dropdown-end w-full">
+            <div className="w-full border-t border-base-300 sticky bottom-0 overflow-visible is-drawer-close:flex is-drawer-close:justify-center">
+                <div className="p-2 dropdown dropdown-right dropdown-end w-full is-drawer-close:w-auto">
                     <button
                         tabIndex={0}
-                        className="flex items-center gap-3 hover:bg-base-300 rounded-md p-2 w-full cursor-pointer"
+                        className="flex items-center gap-3 hover:bg-base-300 rounded-md p-2 w-full cursor-pointer is-drawer-close:w-14 is-drawer-close:h-14 is-drawer-close:justify-center is-drawer-close:mx-auto is-drawer-close:p-1 is-drawer-close:gap-0"
                     >
                         <Avatar
                             size={36}
+                            rounded={false}
+                            className="rounded-md"
                             dicebear={{
                                 seed: user?.name ?? "Guest",
                                 backgroundType: "solid",
-                                radius: 8,
+                                radius: 0,
                             }}
                         />
-                        <div className="min-w-0">
+                        <div className="min-w-0 is-drawer-close:hidden">
                             <div className="text-sm font-medium truncate">
                                 {user?.name ?? "Guest"}
                             </div>
@@ -94,7 +96,7 @@ export default function AppSidebar({ items }) {
                                 </div>
                             )}
                         </div>
-                        <ChevronUpDownIcon className="size-4 ml-auto opacity-60" />
+                        <ChevronUpDownIcon className="size-4 ml-auto opacity-60 is-drawer-close:hidden" />
                     </button>
                     <ul
                         tabIndex={0}
