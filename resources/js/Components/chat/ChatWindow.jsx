@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import MessageBubble from "./MessageBubble.jsx";
 import InputBar from "./InputBar.jsx";
 
@@ -8,34 +9,48 @@ export default function ChatWindow({
     message,
     onMessageChange,
     onSend,
+    forceEmpty = false,
 }) {
     const listRef = useRef(null);
+    const safeMessages = forceEmpty
+        ? []
+        : Array.isArray(messages)
+        ? messages
+        : [];
 
     useEffect(() => {
         if (listRef.current) {
             listRef.current.scrollTop = listRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [safeMessages]);
 
     const grouped = useMemo(() => {
         const byDate = {};
-        for (const m of messages) {
+        for (const m of safeMessages) {
             const d = (m.date || m.created_at || "").slice(0, 10);
             byDate[d] = byDate[d] || [];
             byDate[d].push(m);
         }
         return Object.entries(byDate);
-    }, [messages]);
+    }, [safeMessages]);
 
     return (
         <div className="grow w-full flex flex-col">
             <div
                 ref={listRef}
-                className="flex-1 max-h-11/12 min-h-11/12 overflow-y-auto px-2 py-4"
+                className="flex-1 px-2 py-4"
             >
                 {grouped.length === 0 && (
-                    <div className="flex items-center justify-center h-full opacity-60 text-sm">
-                        Mulai percakapan
+                    <div className="flex items-center justify-center h-full">
+                        <div className="text-center p-6 rounded-lg">
+                            <ChatBubbleLeftRightIcon className="size-6 opacity-60 mx-auto" />
+                            <div className="mt-2 text-sm font-medium">
+                                Belum ada percakapan
+                            </div>
+                            <div className="text-xs opacity-60">
+                                Mulai percakapan
+                            </div>
+                        </div>
                     </div>
                 )}
                 {grouped.map(([date, items]) => (

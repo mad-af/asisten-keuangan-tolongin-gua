@@ -80,10 +80,11 @@ const Index = () => {
         >
             <ChatWindow
                 deviceId={deviceId}
-                messages={messages}
+                messages={[]}
                 message={message}
                 onMessageChange={setMessage}
                 onSend={onSend}
+                forceEmpty={true}
             />
         </div>
     );
