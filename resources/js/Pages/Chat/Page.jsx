@@ -8,13 +8,14 @@ const Index = () => {
     const { user } = usePage().props ?? {};
     const userId = user?.id ?? null;
     const [message, setMessage] = useState("");
-    const { messages, send, fetchMessages } = useChatApi(userId);
+    const { messages, send, fetchMessages, isBlocked } = useChatApi(userId);
 
     useEffect(() => {
         fetchMessages();
     }, []);
 
     const onSend = () => {
+        if (isBlocked) return;
         const text = message.trim();
         if (!text) return;
         setMessage("");
@@ -37,6 +38,7 @@ const Index = () => {
                 onMessageChange={setMessage}
                 onSend={onSend}
                 forceEmpty={false}
+                disabled={isBlocked}
             />
         </div>
     );

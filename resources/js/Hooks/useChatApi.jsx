@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
 export function useChatApi(userId) {
@@ -62,5 +62,13 @@ export function useChatApi(userId) {
     [uid, userId, fetchMessages]
   );
 
-  return { messages, loading, error, fetchMessages, send };
+  const isBlocked = useMemo(() => {
+    const last = messages && messages.length > 0 ? messages[messages.length - 1] : null;
+    if (!last) return false;
+    if (last.type) return last.type === "user";
+    const id = uid || userId;
+    return last.from === id;
+  }, [messages, uid, userId]);
+
+  return { messages, loading, error, fetchMessages, send, isBlocked };
 }

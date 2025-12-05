@@ -1,11 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import {
-    FaceSmileIcon,
-    PaperClipIcon,
-} from "@heroicons/react/24/outline";
+import { FaceSmileIcon, PaperClipIcon } from "@heroicons/react/24/outline";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
-export default function InputBar({ message, onChange, onSend }) {
+export default function InputBar({
+    message,
+    onChange,
+    onSend,
+    disabled = false,
+}) {
     const areaRef = useRef(null);
     useEffect(() => {
         const el = areaRef.current;
@@ -20,30 +22,47 @@ export default function InputBar({ message, onChange, onSend }) {
         <div className="w-full">
             <div className="p-2 pt-0">
                 <div className="flex items-end gap-2 w-full bg-white rounded-3xl p-1 shadow-sm">
-                    <button className="btn btn-ghost btn-circle btn-md w-10 h-10" disabled>
+                    <button
+                        className="btn btn-ghost btn-circle btn-md w-10 h-10"
+                        disabled
+                    >
                         <FaceSmileIcon className="size-5" />
                     </button>
-                    <button className="btn btn-ghost btn-circle btn-md w-10 h-10" disabled>
+                    <button
+                        className="btn btn-ghost btn-circle btn-md w-10 h-10"
+                        disabled
+                    >
                         <PaperClipIcon className="size-5" />
                     </button>
                     <textarea
                         ref={areaRef}
                         value={message}
-                        onChange={(e) => onChange(e.target.value)}
+                        onChange={(e) => !disabled && onChange(e.target.value)}
                         onKeyDown={(e) => {
+                            if (disabled) return;
                             if (e.key === "Enter" && !e.shiftKey) {
                                 e.preventDefault();
                                 onSend();
                             }
                         }}
                         rows={1}
-                        placeholder="Ketik pesan"
-                        className="w-full self-center bg-transparent focus:outline-none resize-none"
+                        placeholder="Ketik pesan..."
+                        className={`w-full self-center bg-transparent focus:outline-none resize-none ${
+                            disabled ? "opacity-60 cursor-not-allowed" : ""
+                        }`}
                         style={{ maxHeight: 140 }}
+                        disabled={disabled}
                     />
                     <button
-                        onClick={onSend}
-                        className="btn bg-[#1a9857] text-[#fdfdfd] btn-circle btn-md w-10 h-10"
+                        onClick={() => {
+                            if (!disabled) onSend();
+                        }}
+                        className={`btn btn-circle btn-md w-10 h-10 ${
+                            disabled
+                                ? "bg-[#cfd8d3] text-[#fdfdfd] opacity-60 cursor-not-allowed"
+                                : "bg-[#1a9857] text-[#fdfdfd]"
+                        }`}
+                        disabled={disabled}
                     >
                         <PaperAirplaneIcon className="size-5" />
                     </button>

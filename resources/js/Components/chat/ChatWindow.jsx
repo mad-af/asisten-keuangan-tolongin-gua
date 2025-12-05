@@ -10,6 +10,7 @@ export default function ChatWindow({
     onMessageChange,
     onSend,
     forceEmpty = false,
+    disabled = false,
 }) {
     const listRef = useRef(null);
     const safeMessages = forceEmpty
@@ -71,10 +72,16 @@ export default function ChatWindow({
                     </div>
                 ))}
             </div>
+            {disabled && (
+                <div className="px-4 pb-1 text-xs opacity-70 text-base-content text-center">
+                    Tunggu jawaban asisten sebelum mengirim pesan berikutnya
+                </div>
+            )}
             <InputBar
                 message={message}
                 onChange={onMessageChange}
                 onSend={onSend}
+                disabled={disabled}
             />
         </div>
     );
