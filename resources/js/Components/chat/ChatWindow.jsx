@@ -31,7 +31,7 @@ export default function ChatWindow({
         <div className="h-full w-full flex flex-col">
             <div
                 ref={listRef}
-                className="flex-1 max-h-11/12 min-h-11/12 overflow-y-auto px-2 py-4 bg-base-100"
+                className="flex-1 max-h-11/12 min-h-11/12 overflow-y-auto px-2 py-4"
             >
                 {grouped.length === 0 && (
                     <div className="flex items-center justify-center h-full opacity-60 text-sm">

@@ -70,7 +70,14 @@ const Index = () => {
     };
 
     return (
-        <div className="relative h-full">
+        <div
+            className="relative h-full"
+            style={{
+                backgroundImage: "url(/assets/chat/whatsapp-default-bg.webp)",
+                backgroundRepeat: "repeat",
+                backgroundPosition: "top left",
+            }}
+        >
             <ChatWindow
                 deviceId={deviceId}
                 messages={messages}
