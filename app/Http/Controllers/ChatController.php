@@ -18,15 +18,12 @@ class ChatController extends Controller
 
     public function index()
     {
-
         return Inertia::render('Chat/Index');
     }
 
-    public function sendMessage(Request $request)
+    public function sendMessageByUser(Request $request)
     {
-        $this->messageService->send($request);
-
-        return redirect()->route('chat.index');
+        return $this->messageService->sendByUser($request);
     }
 
     public function getMessagesByUserId($user_id)

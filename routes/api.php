@@ -12,4 +12,4 @@ Route::post('/users/setup', [UserController::class, 'setup'])->name('api.users.s
 Route::get('/users/me', [UserController::class, 'me'])->name('api.users.me');
 
 Route::get('/messages/{user_id}', [ChatController::class, 'getMessagesByUserId'])->name('api.messages.user');
-Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('api.chat.send');
+Route::post('/chat/send', [ChatController::class, 'sendMessageByUser'])->name('api.chat.send');

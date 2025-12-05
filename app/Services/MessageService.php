@@ -15,15 +15,15 @@ class MessageService
         protected AgentChatService $agentChat
     ) {}
 
-    public function send(Request $request)
+    public function sendByUser(Request $request)
     {
         $userMessage = $request->input('message');
         $userId = $request->input('user_id');
 
         Message::create([
             'user_id' => $userId,
-            'body' => '',
-            'type' => MessageType::assistant,
+            'body' => $userMessage,
+            'type' => MessageType::user,
         ]);
     }
 

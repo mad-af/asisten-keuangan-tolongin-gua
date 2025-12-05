@@ -58,17 +58,15 @@ export default function ChatWindow({
                             </div>
                         </div>
                         <div className="space-y-2">
-                            {items.map((m) => (
-                                <MessageBubble
-                                    key={m.id}
-                                    isMine={
-                                        m.type
-                                            ? m.type === "user"
-                                            : m.from === deviceId
-                                    }
-                                    body={m.body}
-                                />
-                            ))}
+                            {items.map((m) => {
+                                return (
+                                    <MessageBubble
+                                        key={m.id}
+                                        isMine={m.type === "user"}
+                                        body={m.body}
+                                    />
+                                );
+                            })}
                         </div>
                     </div>
                 ))}
