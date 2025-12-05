@@ -3,14 +3,28 @@
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\KolosalChatController;
 use App\Http\Controllers\TestController;
+use App\Services\UserService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
+Route::get('/', function (Request $request, UserService $users) {
+    $token = $request->cookie('user_token');
+    $user = $users->getByToken($token);
+    if ($user) {
+        return redirect()->route('choose-your-setup.index');
+    }
+
     return Inertia::render('Wellcome/Page');
 })->name('wellcome.index');
 
-Route::get('/choose-your-setup', function () {
+Route::get('/choose-your-setup', function (Request $request, UserService $users) {
+    $token = $request->cookie('user_token');
+    $user = $users->getByToken($token);
+    if ($user && $user->setup_type === null) {
+        return redirect()->route('chat.index');
+    }
+
     return Inertia::render('ChooseYourSetup/Page');
 })->name('choose-your-setup.index');
 
@@ -36,7 +50,7 @@ Route::post('/kolosal/chat', [KolosalChatController::class, 'completions'])->nam
 
 Route::controller(ChatController::class)->group(function () {
     // Route::get('/chat', 'index')->name('chat.index');
-    Route::get('/messages/{device_id}', 'getMessages')->name('chat.messages');
+    Route::get('/messages/{user_id}', 'getMessages')->name('chat.messages');
     Route::post('/chat/send', 'sendMessage')->name('chat.send');
 });
 

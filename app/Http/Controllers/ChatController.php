@@ -29,8 +29,8 @@ class ChatController extends Controller
         return redirect()->route('chat.index');
     }
 
-    public function getMessages($device_id)
+    public function getMessagesByUserId($user_id)
     {
-        return Message::where('from', $device_id)->orWhere('to', $device_id)->orderBy('created_at', 'asc')->get();
+        return $this->messageService->getByUserId(userId: $user_id);
     }
 }

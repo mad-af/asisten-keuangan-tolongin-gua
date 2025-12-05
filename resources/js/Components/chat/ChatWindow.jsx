@@ -36,10 +36,7 @@ export default function ChatWindow({
 
     return (
         <div className="grow w-full flex flex-col">
-            <div
-                ref={listRef}
-                className="flex-1 px-2 py-4"
-            >
+            <div ref={listRef} className="flex-1 px-2 py-4">
                 {grouped.length === 0 && (
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center p-6 rounded-lg">
@@ -64,7 +61,11 @@ export default function ChatWindow({
                             {items.map((m) => (
                                 <MessageBubble
                                     key={m.id}
-                                    isMine={m.from === deviceId}
+                                    isMine={
+                                        m.type
+                                            ? m.type === "user"
+                                            : m.from === deviceId
+                                    }
                                     body={m.body}
                                 />
                             ))}

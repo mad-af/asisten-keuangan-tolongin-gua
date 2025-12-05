@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,9 +36,24 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = null;
+        try {
+            /** @var UserService $users */
+            $users = app(UserService::class);
+            $token = $request->cookie('user_token');
+            $u = $users->getByToken($token);
+            if ($u) {
+                $user = [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'setup_type' => $u->setup_type,
+                ];
+            }
+        } catch (\Throwable $e) {}
+
         return [
             ...parent::share($request),
-            //
+            'user' => $user,
         ];
     }
 }

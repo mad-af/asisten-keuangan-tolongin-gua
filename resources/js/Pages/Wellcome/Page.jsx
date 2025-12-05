@@ -1,13 +1,27 @@
 import { Head, router } from "@inertiajs/react";
 import LoginLayout from "../../Layouts/LoginLayout.jsx";
 import DeviceOnboardForm from "../../Components/presentational/DeviceOnboardForm.jsx";
-import { useRegisterDevice } from "../../Hooks/useRegisterDevice.jsx";
+import { useUserApi } from "../../Hooks/useUserApi.jsx";
+import { useEffect } from "react";
 
 function OnboardingContainer() {
-    const { name, setName, loadingEnter, error, handleEnter } =
-        useRegisterDevice({
-            onSuccess: () => router.visit("/choose-your-setup"),
-        });
+    const { name, setName, loadingEnter, error, register } = useUserApi({
+        onRegisterSuccess: () => router.visit("/choose-your-setup"),
+    });
+
+    useEffect(() => {
+        const getCookie = (name) =>
+            typeof document !== "undefined"
+                ? document.cookie
+                      .split(";")
+                      .map((c) => c.trim())
+                      .find((c) => c.startsWith(name + "="))
+                : null;
+        const tokenCookie = getCookie("user_token");
+        if (tokenCookie) {
+            router.visit("/choose-your-setup");
+        }
+    }, []);
 
     return (
         <>
@@ -17,7 +31,7 @@ function OnboardingContainer() {
                 setName={setName}
                 error={error}
                 loadingEnter={loadingEnter}
-                onEnter={handleEnter}
+                onEnter={register}
             />
         </>
     );

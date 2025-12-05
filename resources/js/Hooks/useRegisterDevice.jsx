@@ -72,17 +72,15 @@ export function useRegisterDevice({ onSuccess } = {}) {
         setError("");
         setLoadingDummy(true);
         try {
-            const device_id = getOrCreateDeviceId();
-            const trimmed = (name || "").trim();
             const res = await axios.post(
                 "/api/devices/dummy",
-                { device_id, device_name: trimmed || "Dummy User" },
+                {},
                 { withCredentials: true }
             );
             const data = res?.data ?? {};
             const device = {
-                device_id: data?.device_id ?? device_id,
-                device_name: data?.device_name ?? (trimmed || "Dummy User"),
+                device_id: data?.device_id ?? "dummy-device",
+                device_name: data?.device_name ?? "Dummy User",
                 token: data?.token ?? "dummy-token",
             };
             saveDeviceLocal(device);

@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Enums\MessageType;
 use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
     protected $fillable = [
-        'from',
-        'to',
+        'user_id',
         'body',
-        'status',
+        'type',
+    ];
+
+    protected $casts = [
+        'type' => MessageType::class,
     ];
 }
