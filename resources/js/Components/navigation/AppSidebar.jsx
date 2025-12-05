@@ -100,7 +100,7 @@ export default function AppSidebar({ items }) {
                     </button>
                     <ul
                         tabIndex={0}
-                        className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 z-50"
+                        className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mb-2 z-50"
                     >
                         <li>
                             <a className="text-error flex items-center gap-2">

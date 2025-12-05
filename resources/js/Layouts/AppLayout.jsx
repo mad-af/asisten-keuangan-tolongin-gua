@@ -33,7 +33,7 @@ export default function AppLayout({ children }) {
                 <div className="grow w-full">{children}</div>
             </div>
 
-            <div className="drawer-side z-20">
+            <div className="drawer-side z-20 overflow-visible">
                 <label
                     htmlFor="my-drawer-4"
                     aria-label="close sidebar"
