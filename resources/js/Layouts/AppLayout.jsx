@@ -8,7 +8,7 @@ import {
 
 export default function AppLayout({ children }) {
     return (
-        <div className="drawer lg:drawer-open bg-base-200">
+        <div className="drawer min-h-screen lg:drawer-open bg-base-200">
             <input
                 id="my-drawer-4"
                 type="checkbox"
