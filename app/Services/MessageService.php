@@ -4,9 +4,7 @@ namespace App\Services;
 
 use App\Enums\MessageType;
 use App\Models\Message;
-use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class MessageService
 {
@@ -32,6 +30,13 @@ class MessageService
         return Message::where('user_id', $userId)
             ->orderBy('created_at', 'asc')
             ->get();
+    }
+
+    public function latestByUserId(string|int $userId)
+    {
+        return Message::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->first();
     }
 
     /**

@@ -2,18 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Device;
-use App\Models\Message;
-use App\Models\Transaction;
-use App\Services\AiParse;
-use App\Services\KolosalApiClient;
 use App\Services\MessageService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ChatController extends Controller
 {
-
     public function __construct(protected MessageService $messageService) {}
 
     public function index()
@@ -29,5 +23,15 @@ class ChatController extends Controller
     public function getMessagesByUserId($user_id)
     {
         return $this->messageService->getByUserId(userId: $user_id);
+    }
+
+    public function getLatestMessageByUserId($user_id)
+    {
+        $latest = $this->messageService->latestByUserId(userId: $user_id);
+        if ($latest) {
+            return response()->json($latest);
+        }
+
+        return response()->json([]);
     }
 }
