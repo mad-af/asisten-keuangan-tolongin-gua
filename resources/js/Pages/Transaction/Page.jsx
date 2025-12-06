@@ -1,4 +1,5 @@
 import React from "react";
+import { Head } from "@inertiajs/react";
 import AppLayout from "../../Layouts/AppLayout.jsx";
 import TransactionTable from "../../Components/transaction/TransactionTable.jsx";
 import CashflowChart from "../../Components/charts/CashflowChart.jsx";
@@ -12,6 +13,7 @@ const Index = () => {
 
     return (
         <div className="h-full w-full p-4">
+            <Head title="Transaksi" />
             <MonthlyStatsCards stats={stats} />
             <div className="divider"></div>
             <CashflowChart series={cashflow} transactions={transactions} />

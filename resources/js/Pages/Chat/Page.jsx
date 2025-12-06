@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import AppLayout from "../../Layouts/AppLayout.jsx";
+import { Head } from "@inertiajs/react";
 import { router, usePage } from "@inertiajs/react";
 import ChatWindow from "../../Components/chat/ChatWindow.jsx";
 import { useChatApi } from "../../Hooks/useChatApi.jsx";
@@ -23,6 +24,8 @@ const Index = () => {
     };
 
     return (
+        <>
+        <Head title="Chat" />
         <div
             className="relative h-full"
             style={{
@@ -41,6 +44,7 @@ const Index = () => {
                 disabled={isBlocked}
             />
         </div>
+        </>
     );
 };
 
