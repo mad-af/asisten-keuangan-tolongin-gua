@@ -15,6 +15,31 @@ class KolosalChatController extends Controller
 
         $result = $this->agent->chat($message);
 
-        return response()->json($result, 200);
+        $items = $result?->all() ?? [];
+        $mapped = array_map(function ($it) {
+            $res = $it['result'] ?? null;
+            if ($res instanceof \Illuminate\Database\Eloquent\Model) {
+                $resData = $res->toArray();
+            } elseif (is_array($res)) {
+                $resData = $res;
+            } elseif (is_object($res)) {
+                $resData = method_exists($res, 'toArray') ? $res->toArray() : json_decode(json_encode($res), true);
+            } else {
+                $resData = $res;
+            }
+
+            return [
+                'index' => $it['index'] ?? null,
+                'function' => $it['function'] ?? null,
+                'args' => $it['args'] ?? [],
+                'error' => $it['error'] ?? null,
+                'result' => $resData,
+            ];
+        }, $items);
+
+        return response()->json([
+            'persona_chat' => $result?->personaChat(),
+            'items' => $mapped,
+        ], 200);
     }
 }

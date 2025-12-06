@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Message;
 use App\Models\Transaction;
 
 class AgentToolService
@@ -13,7 +14,7 @@ class AgentToolService
     /**
      * Create a new class instance.
      */
-    public function __construct(protected AgentChatService $agentChat)
+    public function __construct(protected AgentChatService $agentChat, protected FinanceAnalyzeService $financeAnalyze)
     {
         //
     }
@@ -88,7 +89,6 @@ class AgentToolService
                 $return = $rm->invokeArgs($this, $args);
                 $results[] = ['index' => $index, 'function' => $functionName, 'args' => $args, 'result' => $return];
             } catch (\Throwable $e) {
-                dd($e);
                 $results[] = ['index' => $index, 'function' => $functionName, 'error' => 'exception', 'message' => $e->getMessage()];
             }
             $index++;
@@ -230,7 +230,7 @@ class AgentToolService
             try {
                 $this->resolveUserIdFromRequest();
                 if ($this->userId) {
-                    $messages = \App\Models\Message::lastTenRoleContentByUser($this->userId);
+                    $messages = Message::lastTenRoleContentByUser($this->userId);
                 }
             } catch (\Throwable $e) {
             }
@@ -241,13 +241,22 @@ class AgentToolService
 
     protected function finance_analyze_chat(string $context)
     {
-        $this->agentChat->agentFinanceAnalyze($context);
+        $this->resolveUserIdFromRequest();
+        if (! $this->userId) {
+            logger()->warning('finance_analyze_chat_unauthorized');
+
+            return;
+        }
+        $this->userId=2;
+        $financeAnalysisResult = $this->agentChat->agentFinanceAnalyze($context);
+        $financeAnalysis = $this->financeAnalyze->executeWithUser($financeAnalysisResult, $this->userId);
 
         $items = $this->getOrchestrator();
 
-        $result = array_map(function ($n) {
-            if ($n['function'] === 'persona_chat') {
-                $n['param']['premessages'] = ['run'];
+        $result = array_map(function ($n) use ($financeAnalysis) {
+            if (($n['function'] ?? null) === 'persona_chat') {
+                $n['param'] = $n['param'] ?? [];
+                $n['param']['premessages'] = $financeAnalysis->generateMessages();
             }
 
             return $n;
@@ -256,6 +265,7 @@ class AgentToolService
         $this->setOrchestrator($result);
         logger()->info('finance_analyze_chat', [
             'context' => $context,
+            'financeAnalyzeResult' => $financeAnalysisResult,
         ]);
     }
 }

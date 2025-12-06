@@ -27,7 +27,7 @@ Available functions:
 Date rules:
 - Use ISO date format YYYY-MM-DD for all date parameters.
 - If user omits date, default to today's date in YYYY-MM-DD.
-- Acknowledge that your training data is not current. The current date is " . date('Y-m-d') . ". Always use this date when referring to 'today'
+- Acknowledge that your training data is not current. The current date is ".date('Y-m-d').". Always use this date when referring to 'today'
 
 Decision rules (priority):
 1. If user requests DB read/write, charts, or computations -> choose functions (tool).
@@ -96,13 +96,7 @@ End.
         ];
 
         if ($premessages !== null) {
-            $finalpremessages = array_map(function ($msg) {
-                return [
-                    'role' => 'assistant',
-                    'content' => $msg,
-                ];
-            }, $premessages);
-            $messages = array_merge($messages, $finalpremessages);
+            $messages = array_merge($messages, $premessages);
         }
 
         if ($message !== null) {
@@ -140,7 +134,7 @@ Table schema:
 Instructions:
 1. Interpret the 'context' and generate ONLY the necessary SELECT queries.
 2. Each query must filter by device_id = '{$deviceId}'.
-3. Use today's date as " . date('Y-m-d') . " when 'today' is mentioned.
+3. Use today's date as ".date('Y-m-d')." when 'today' is mentioned.
 4. Output format (strictly):
 
 [N]{sql;reason}:
@@ -190,7 +184,7 @@ Responsibilities:
 Rules:
 - Only SELECT queries allowed.
 - Use ISO dates (YYYY-MM-DD) when filtering.
-- Acknowledge that your training data is not current. The current date is " . date('Y-m-d') . ". Always use this date when referring to 'today'
+- Acknowledge that your training data is not current. The current date is ".date('Y-m-d').". Always use this date when referring to 'today'
 - Keep reasoning short and precise.
 - Output MUST follow this exact custom format (no JSON):
 
@@ -269,14 +263,16 @@ End.
     {
         return $this->retry(function () use ($message) {
             $response = $this->agentOrchestratorChat($message);
+
             return $this->decodeOrchestratorResponse($response);
         });
     }
 
-    public function agentFinanceAnalyze(string $message): array
+    public function agentFinanceAnalyze(string $message): FinanceAnalyzeResult
     {
         return $this->retry(function () use ($message) {
             $response = $this->agentFinanceAnalyzeChat($message);
+
             return $this->decodeFinanceAnalyzeResponse($response);
         });
     }
@@ -320,30 +316,9 @@ End.
         return $result;
     }
 
-    protected function decodeFinanceAnalyzeResponse(string $response): array
+    protected function decodeFinanceAnalyzeResponse(string $response): FinanceAnalyzeResult
     {
-        $lines = preg_split("/\r\n|\n|\r/", trim($response));
-
-        // skip header
-        array_shift($lines);
-
-        $queries = [];
-
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line === '') {
-                continue;
-            }
-
-            [$sql, $reason] = explode(';', $line, 2);
-
-            $queries[] = [
-                'sql' => trim($sql),
-                'reason' => trim($reason),
-            ];
-        }
-
-        return $queries;
+        return FinanceAnalyzeResult::parse($response);
     }
 
     protected function retry(callable $fn, int $maxRetries = 2, int $delayMs = 200)
