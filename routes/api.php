@@ -18,3 +18,4 @@ Route::post('/chat/send', [ChatController::class, 'sendMessageByUser'])->name('a
 
 Route::get('/transactions', [TransactionController::class, 'index'])->name('api.transactions.index');
 Route::get('/transactions/cashflow', [TransactionController::class, 'cashflow'])->name('api.transactions.cashflow');
+Route::get('/transactions/stats-month', [TransactionController::class, 'statsMonth'])->name('api.transactions.stats_month');

@@ -66,4 +66,34 @@ class TransactionService
             'outData' => $outData,
         ];
     }
+
+    public function monthlyStatsByUser(User $user, ?string $month = null): array
+    {
+        $deviceId = $this->resolveDeviceId($user);
+        $now = \Illuminate\Support\Carbon::now();
+        if ($month) {
+            try {
+                $now = \Illuminate\Support\Carbon::createFromFormat('Y-m', $month);
+            } catch (\Throwable $e) {}
+        }
+        $start = $now->copy()->startOfMonth()->format('Y-m-d');
+        $end = $now->copy()->endOfMonth()->format('Y-m-d');
+
+        $inTotal = (int) Transaction::where('user_id', $deviceId)
+            ->whereBetween('date', [$start, $end])
+            ->where('type', TransactionType::IN)
+            ->sum('amount');
+
+        $outTotal = (int) Transaction::where('user_id', $deviceId)
+            ->whereBetween('date', [$start, $end])
+            ->where('type', TransactionType::OUT)
+            ->sum('amount');
+
+        return [
+            'month' => $now->format('Y-m'),
+            'in_total' => $inTotal,
+            'out_total' => $outTotal,
+            'net_total' => $inTotal - $outTotal,
+        ];
+    }
 }

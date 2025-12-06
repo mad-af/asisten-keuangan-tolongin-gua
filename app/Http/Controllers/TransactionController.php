@@ -26,5 +26,14 @@ class TransactionController extends Controller
         if (! $user) return response()->json(['error' => 'Unauthorized'], 401);
         return response()->json($this->transactions->cashflowByUser($user));
     }
-}
 
+    public function statsMonth(Request $request)
+    {
+        $token = $request->cookie('user_token') ?? (string) $request->input('token', '');
+        $user = $this->users->getByToken($token);
+        if (! $user) return response()->json(['error' => 'Unauthorized'], 401);
+        $month = (string) $request->query('month', '');
+        $month = $month !== '' ? $month : null;
+        return response()->json($this->transactions->monthlyStatsByUser($user, $month));
+    }
+}

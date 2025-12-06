@@ -40,7 +40,7 @@ export default function AppLayout({ children }) {
                 id="my-drawer-4"
                 type="checkbox"
                 className="drawer-toggle"
-                defaultChecked
+                // defaultChecked
             />
             <div className="flex flex-col drawer-content m-1 md:m-2 md:ml-0.5 bg-base-100 rounded-md shadow-lg">
                 {/* Navbar */}
