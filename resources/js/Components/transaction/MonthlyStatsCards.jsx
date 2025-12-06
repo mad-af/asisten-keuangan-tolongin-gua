@@ -20,19 +20,19 @@ export default function MonthlyStatsCards({ stats }) {
       <div className="card bg-base-100 shadow">
         <div className="card-body">
           <div className="text-xs opacity-60">Pemasukan • {monthLabel}</div>
-          <div className="text-2xl font-semibold text-success">{fmt.format(stats?.in_total || 0)}</div>
+          <div className="text-2xl font-semibold text-success">+{fmt.format(stats?.in_total || 0)}</div>
         </div>
       </div>
       <div className="card bg-base-100 shadow">
         <div className="card-body">
           <div className="text-xs opacity-60">Pengeluaran • {monthLabel}</div>
-          <div className="text-2xl font-semibold text-error">{fmt.format(stats?.out_total || 0)}</div>
+          <div className="text-2xl font-semibold text-error">-{fmt.format(stats?.out_total || 0)}</div>
         </div>
       </div>
       <div className="card bg-base-100 shadow">
         <div className="card-body">
           <div className="text-xs opacity-60">Total • {monthLabel}</div>
-          <div className="text-2xl font-semibold">{fmt.format((stats?.net_total || 0))}</div>
+          <div className="text-2xl font-semibold">={fmt.format((stats?.net_total || 0))}</div>
         </div>
       </div>
     </div>

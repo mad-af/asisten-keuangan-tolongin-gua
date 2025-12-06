@@ -13,7 +13,8 @@ function TestPage() {
                       .find((c) => c.startsWith(name + "="))
                 : null;
         const tokenCookie = getCookie("user_token");
-        const setupTypeCookie = getCookie("setup_type");
+        const setupTypeCookie = localStorage.getItem("setup_type");
+        console.log(tokenCookie && setupTypeCookie, tokenCookie, setupTypeCookie)
         if (tokenCookie && setupTypeCookie) {
             router.visit("/chat");
         }
