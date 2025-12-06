@@ -11,18 +11,17 @@ class AgentService
      */
     public function __construct(protected AgentChatService $agentChat, protected AgentToolService $agentTool) {}
 
-    public function chat(string $message): array
+    public function chat(string $message, ?string $userId = null): ?AgentToolCallResult
     {
         try {
             $orchestrator = $this->agentChat->agentOrchestrator($message);
 
-            $data = $this->agentTool->call($orchestrator);
-            
+            $data = $this->agentTool->call($orchestrator, $userId);
         } catch (\Throwable $th) {
             Log::error('AgentService::chat error', ['exception' => $th->getMessage(), 'trace' => $th->getTraceAsString()]);
-            return ['data' => null];
+            return null;
         } finally {
-            return ['data' => $data];
+            return $data;
         }
     }
 

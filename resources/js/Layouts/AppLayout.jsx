@@ -1,10 +1,75 @@
-import NavBar from '../Components/navigation/NavBar.jsx';
+import AppSidebar from "../Components/navigation/AppSidebar.jsx";
+import Logo from "../Components/ui/Logo.jsx";
+import Breadcrumbs from "../Components/navigation/Breadcrumbs.jsx";
+import {
+    ArrowRightStartOnRectangleIcon,
+    Bars3Icon,
+} from "@heroicons/react/24/outline";
+import { useEffect } from "react";
+import { router } from "@inertiajs/react";
 
 export default function AppLayout({ children }) {
-  return (
-    <div className="min-h-screen bg-base-200 text-base-content">
-      <NavBar />
-      <main className="container mx-auto p-4">{children}</main>
-    </div>
-  );
+    useEffect(() => {
+        const getCookie = (name) =>
+            typeof document !== "undefined"
+                ? document.cookie
+                      .split(";")
+                      .map((c) => c.trim())
+                      .find((c) => c.startsWith(name + "="))
+                : null;
+        const tokenCookie = getCookie("user_token");
+        const setupType =
+            typeof localStorage !== "undefined"
+                ? localStorage.getItem("setup_type")
+                : null;
+        const isSetupEmpty =
+            setupType == null || setupType === "null" || setupType.trim() === "";
+        if (!tokenCookie) {
+            router.visit("/");
+            return;
+        }
+        if (isSetupEmpty) {
+            router.visit("/choose-your-setup");
+            return;
+        }
+    }, []);
+
+    return (
+        <div className="drawer min-h-screen lg:drawer-open bg-base-200">
+            <input
+                id="my-drawer-4"
+                type="checkbox"
+                className="drawer-toggle"
+                // defaultChecked
+            />
+            <div className="flex flex-col drawer-content m-1 md:m-2 md:ml-0.5 bg-base-100 rounded-md shadow-lg">
+                {/* Navbar */}
+                <nav className="navbar w-full min-h-8 sticky top-0 z-10 bg-base-100 border-b border-base-300">
+                    <label
+                        htmlFor="my-drawer-4"
+                        aria-label="open sidebar"
+                        className="btn btn-square btn-ghost"
+                    >
+                        {/* Sidebar toggle icon */}
+                        <ArrowRightStartOnRectangleIcon className="size-4" />
+                    </label>
+
+                    <Breadcrumbs />
+                </nav>
+                {/* Page content here */}
+                <div className="grow w-full">{children}</div>
+            </div>
+
+            <div className="drawer-side z-20 overflow-visible">
+                <label
+                    htmlFor="my-drawer-4"
+                    aria-label="close sidebar"
+                    className="drawer-overlay"
+                ></label>
+                <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
+                    <AppSidebar />
+                </div>
+            </div>
+        </div>
+    );
 }

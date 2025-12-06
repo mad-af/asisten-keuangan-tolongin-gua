@@ -2,14 +2,19 @@
 
 namespace App\Services;
 
+use App\Models\Message;
+use App\Models\Transaction;
+
 class AgentToolService
 {
     protected array $orchestrator = [];
 
+    protected ?string $userId = null;
+
     /**
      * Create a new class instance.
      */
-    public function __construct(protected AgentChatService $agentChat)
+    public function __construct(protected AgentChatService $agentChat, protected FinanceAnalyzeService $financeAnalyze)
     {
         //
     }
@@ -43,8 +48,13 @@ class AgentToolService
         }
     }
 
-    public function call(array $orchestrator): array
+    public function call(array $orchestrator, ?string $userId = null): AgentToolCallResult
     {
+        if ($userId !== null) {
+            $this->userId = (string) $userId;
+        } else {
+            $this->resolveUserIdFromRequest();
+        }
         $this->setOrchestrator($orchestrator);
         $results = [];
 
@@ -79,13 +89,29 @@ class AgentToolService
                 $return = $rm->invokeArgs($this, $args);
                 $results[] = ['index' => $index, 'function' => $functionName, 'args' => $args, 'result' => $return];
             } catch (\Throwable $e) {
-                dd($e);
                 $results[] = ['index' => $index, 'function' => $functionName, 'error' => 'exception', 'message' => $e->getMessage()];
             }
             $index++;
         }
 
-        return $results;
+        return new AgentToolCallResult($results);
+    }
+
+    private function resolveUserIdFromRequest(): void
+    {
+        if ($this->userId !== null) {
+            return;
+        }
+        try {
+            /** @var UserService $users */
+            $users = app(UserService::class);
+            $token = request()->cookie('user_token');
+            $user = $users->getByToken($token);
+            if ($user) {
+                $this->userId = (string) $user->id;
+            }
+        } catch (\Throwable $e) {
+        }
     }
 
     private function coerceArgsIndexed(array $params, \ReflectionMethod $rm): array
@@ -147,43 +173,126 @@ class AgentToolService
 
     protected function transaction_in(int $amount, string $note, string $date)
     {
-        logger()->info('transaction_in', [
-            'amount' => $amount,
-            'note' => $note,
-            'date' => $date,
-        ]);
+        try {
+            $this->resolveUserIdFromRequest();
+            if (! $this->userId) {
+                logger()->warning('transaction_in_unauthorized');
+
+                return null;
+            }
+
+            $tx = Transaction::createIn($this->userId, $amount, $note, $date);
+            logger()->info('transaction_in', [
+                'user_id' => $this->userId,
+                'amount' => $amount,
+                'note' => $note,
+                'date' => $date,
+            ]);
+
+            return $tx;
+        } catch (\Throwable $e) {
+            logger()->error('transaction_in_error', ['message' => $e->getMessage()]);
+
+            return null;
+        }
     }
 
     protected function transaction_out(int $amount, string $note, string $date)
     {
-        logger()->info('transaction_out', [
-            'amount' => $amount,
-            'note' => $note,
-            'date' => $date,
-        ]);
+        try {
+            $this->resolveUserIdFromRequest();
+            if (! $this->userId) {
+                logger()->warning('transaction_out_unauthorized');
+
+                return null;
+            }
+
+            $tx = Transaction::createOut($this->userId, $amount, $note, $date);
+            logger()->info('transaction_out', [
+                'user_id' => $this->userId,
+                'amount' => $amount,
+                'note' => $note,
+                'date' => $date,
+            ]);
+
+            return $tx;
+        } catch (\Throwable $e) {
+            logger()->error('transaction_out_error', ['message' => $e->getMessage()]);
+
+            return null;
+        }
     }
 
     protected function persona_chat(string $reason, ?array $premessages): string
-    {        
-        return $this->agentChat->agentPersonaChat($reason, $premessages);   
+    {
+        $messages = $premessages;
+        if ($messages === null || (is_array($messages) && in_array('run', $messages, true))) {
+            try {
+                $this->resolveUserIdFromRequest();
+                if ($this->userId) {
+                    $messages = Message::lastTenRoleContentByUser($this->userId);
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
+        return $this->agentChat->agentPersonaChat($reason, $messages);
     }
 
     protected function finance_analyze_chat(string $context)
     {
-        // $this->agentChat->agentFinanceAnalyze($context);
+        $this->resolveUserIdFromRequest();
+        if (! $this->userId) {
+            logger()->warning('finance_analyze_chat_unauthorized');
+
+            return;
+        }
+
+        $financeAnalysisResult = $this->agentChat->agentFinanceAnalyze($context);
+        $financeAnalysis = $this->financeAnalyze->executeWithUser($financeAnalysisResult, $this->userId);
 
         $items = $this->getOrchestrator();
 
-        $result = array_map(function ($n) {
-            if ($n['function'] === 'persona_chat') {
-                $n['param']['premessages'] = ['run'];
+        $result = array_map(function ($n) use ($financeAnalysis) {
+            if (($n['function'] ?? null) === 'persona_chat') {
+                $n['param'] = $n['param'] ?? [];
+                $n['param']['premessages'] = $financeAnalysis->generateMessages();
             }
+
             return $n;
         }, $items);
 
         $this->setOrchestrator($result);
         logger()->info('finance_analyze_chat', [
             'context' => $context,
+            'financeAnalyzeResult' => $financeAnalysisResult,
         ]);
+    }
+}
+
+class AgentToolCallResult
+{
+    protected array $items;
+
+    public function __construct(array $items)
+    {
+        $this->items = $items;
+    }
+
+    public function all(): array
+    {
+        return $this->items;
+    }
+
+    public function personaChat(): mixed
+    {
+        for ($i = count($this->items) - 1; $i >= 0; $i--) {
+            $it = $this->items[$i];
+            if (($it['function'] ?? null) === 'persona_chat') {
+                return $it['result'] ?? null;
+            }
+        }
+
+        return null;
     }
 }

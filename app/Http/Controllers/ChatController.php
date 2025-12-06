@@ -2,35 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Device;
-use App\Models\Message;
-use App\Models\Transaction;
-use App\Services\AiParse;
-use App\Services\KolosalApiClient;
 use App\Services\MessageService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ChatController extends Controller
 {
-
     public function __construct(protected MessageService $messageService) {}
 
     public function index()
     {
-
         return Inertia::render('Chat/Index');
     }
 
-    public function sendMessage(Request $request)
+    public function sendMessageByUser(Request $request)
     {
-        $this->messageService->send($request);
-
-        return redirect()->route('chat.index');
+        return $this->messageService->sendByUser($request);
     }
 
-    public function getMessages($device_id)
+    public function getMessagesByUserId($user_id)
     {
-        return Message::where('from', $device_id)->orWhere('to', $device_id)->orderBy('created_at', 'asc')->get();
+        return $this->messageService->getByUserId(userId: $user_id);
+    }
+
+    public function getLatestMessageByUserId($user_id)
+    {
+        $latest = $this->messageService->latestByUserId(userId: $user_id);
+        if ($latest) {
+            return response()->json($latest);
+        }
+
+        return response()->json([]);
+    }
+
+    public function createFallbackByUserId($user_id)
+    {
+        $created = $this->messageService->createFallbackByUserId(userId: $user_id);
+
+        return response()->json($created, 201);
     }
 }

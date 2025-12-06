@@ -79,7 +79,7 @@ export default function ChatWindow() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 p-4 space-y-3">
                 {messages.length === 0 ? (
                     <p className="text-center text-sm opacity-50">
                         Belum ada pesan...
