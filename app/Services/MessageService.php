@@ -44,7 +44,7 @@ class MessageService
     {
         sleep(1);
         $responseMessage = "Maaf, saya tidak mengerti. Silakan coba lagi.";
-        $response = $this->agent->chat($message);
+        $response = $this->agent->chat($message, $userId);
         if (!empty($response)) {
             $responseMessage = $response->personaChat();
         }

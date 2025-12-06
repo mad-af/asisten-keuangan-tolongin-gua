@@ -8,6 +8,8 @@ class AgentToolService
 {
     protected array $orchestrator = [];
 
+    protected ?string $userId = null;
+
     /**
      * Create a new class instance.
      */
@@ -45,8 +47,13 @@ class AgentToolService
         }
     }
 
-    public function call(array $orchestrator): AgentToolCallResult
+    public function call(array $orchestrator, ?string $userId = null): AgentToolCallResult
     {
+        if ($userId !== null) {
+            $this->userId = (string) $userId;
+        } else {
+            $this->resolveUserIdFromRequest();
+        }
         $this->setOrchestrator($orchestrator);
         $results = [];
 
@@ -88,6 +95,23 @@ class AgentToolService
         }
 
         return new AgentToolCallResult($results);
+    }
+
+    private function resolveUserIdFromRequest(): void
+    {
+        if ($this->userId !== null) {
+            return;
+        }
+        try {
+            /** @var UserService $users */
+            $users = app(UserService::class);
+            $token = request()->cookie('user_token');
+            $user = $users->getByToken($token);
+            if ($user) {
+                $this->userId = (string) $user->id;
+            }
+        } catch (\Throwable $e) {
+        }
     }
 
     private function coerceArgsIndexed(array $params, \ReflectionMethod $rm): array
@@ -150,19 +174,16 @@ class AgentToolService
     protected function transaction_in(int $amount, string $note, string $date)
     {
         try {
-            /** @var UserService $users */
-            $users = app(UserService::class);
-            $token = request()->cookie('user_token');
-            $user = $users->getByToken($token);
-            if (! $user) {
+            $this->resolveUserIdFromRequest();
+            if (! $this->userId) {
                 logger()->warning('transaction_in_unauthorized');
 
                 return null;
             }
 
-            $tx = Transaction::createIn($user->id, $amount, $note, $date);
+            $tx = Transaction::createIn($this->userId, $amount, $note, $date);
             logger()->info('transaction_in', [
-                'user_id' => $user->id,
+                'user_id' => $this->userId,
                 'amount' => $amount,
                 'note' => $note,
                 'date' => $date,
@@ -179,19 +200,16 @@ class AgentToolService
     protected function transaction_out(int $amount, string $note, string $date)
     {
         try {
-            /** @var UserService $users */
-            $users = app(UserService::class);
-            $token = request()->cookie('user_token');
-            $user = $users->getByToken($token);
-            if (! $user) {
+            $this->resolveUserIdFromRequest();
+            if (! $this->userId) {
                 logger()->warning('transaction_out_unauthorized');
 
                 return null;
             }
 
-            $tx = Transaction::createOut($user->id, $amount, $note, $date);
+            $tx = Transaction::createOut($this->userId, $amount, $note, $date);
             logger()->info('transaction_out', [
-                'user_id' => $user->id,
+                'user_id' => $this->userId,
                 'amount' => $amount,
                 'note' => $note,
                 'date' => $date,
@@ -207,12 +225,23 @@ class AgentToolService
 
     protected function persona_chat(string $reason, ?array $premessages): string
     {
-        return $this->agentChat->agentPersonaChat($reason, $premessages);
+        $messages = $premessages;
+        if ($messages === null || (is_array($messages) && in_array('run', $messages, true))) {
+            try {
+                $this->resolveUserIdFromRequest();
+                if ($this->userId) {
+                    $messages = \App\Models\Message::lastTenRoleContentByUser($this->userId);
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
+        return $this->agentChat->agentPersonaChat($reason, $messages);
     }
 
     protected function finance_analyze_chat(string $context)
     {
-        // $this->agentChat->agentFinanceAnalyze($context);
+        $this->agentChat->agentFinanceAnalyze($context);
 
         $items = $this->getOrchestrator();
 
