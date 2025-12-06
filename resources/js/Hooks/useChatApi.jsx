@@ -7,6 +7,7 @@ export function useChatApi(userId) {
     const [error, setError] = useState("");
     const [uid, setUid] = useState(userId || null);
     const [polling, setPolling] = useState(false);
+    const [sending, setSending] = useState(false);
 
     const fetchMessages = useCallback(async () => {
         const targetId = uid || userId;
@@ -52,12 +53,16 @@ export function useChatApi(userId) {
             };
             setMessages((prev) => [...prev, optimistic]);
             try {
+                setSending(true);
                 await axios.post(
                     "/api/chat/send",
                     { message: body, user_id: targetId },
                     { withCredentials: true, timeout: 60000 }
                 );
-            } catch (e) {}
+            } catch (e) {
+            } finally {
+                setSending(false);
+            }
         },
         [uid, userId]
     );
@@ -77,6 +82,7 @@ export function useChatApi(userId) {
         const targetId = uid || userId;
         if (!targetId) return;
         if (!isBlocked || polling) return;
+        if (sending) return;
         const attemptsRef = { current: 0 };
         const cancelRef = { current: false };
         const run = async () => {
@@ -125,7 +131,7 @@ export function useChatApi(userId) {
         return () => {
             cancelRef.current = true;
         };
-    }, [isBlocked, uid, userId]);
+    }, [isBlocked, uid, userId, sending]);
 
     return { messages, loading, error, fetchMessages, send, isBlocked };
 }
