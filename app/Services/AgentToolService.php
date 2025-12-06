@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Transaction;
+
 class AgentToolService
 {
     protected array $orchestrator = [];
@@ -43,7 +45,7 @@ class AgentToolService
         }
     }
 
-    public function call(array $orchestrator): array
+    public function call(array $orchestrator): AgentToolCallResult
     {
         $this->setOrchestrator($orchestrator);
         $results = [];
@@ -85,7 +87,7 @@ class AgentToolService
             $index++;
         }
 
-        return $results;
+        return new AgentToolCallResult($results);
     }
 
     private function coerceArgsIndexed(array $params, \ReflectionMethod $rm): array
@@ -147,25 +149,65 @@ class AgentToolService
 
     protected function transaction_in(int $amount, string $note, string $date)
     {
-        logger()->info('transaction_in', [
-            'amount' => $amount,
-            'note' => $note,
-            'date' => $date,
-        ]);
+        try {
+            /** @var UserService $users */
+            $users = app(UserService::class);
+            $token = request()->cookie('user_token');
+            $user = $users->getByToken($token);
+            if (! $user) {
+                logger()->warning('transaction_in_unauthorized');
+
+                return null;
+            }
+
+            $tx = Transaction::createIn($user->id, $amount, $note, $date);
+            logger()->info('transaction_in', [
+                'user_id' => $user->id,
+                'amount' => $amount,
+                'note' => $note,
+                'date' => $date,
+            ]);
+
+            return $tx;
+        } catch (\Throwable $e) {
+            logger()->error('transaction_in_error', ['message' => $e->getMessage()]);
+
+            return null;
+        }
     }
 
     protected function transaction_out(int $amount, string $note, string $date)
     {
-        logger()->info('transaction_out', [
-            'amount' => $amount,
-            'note' => $note,
-            'date' => $date,
-        ]);
+        try {
+            /** @var UserService $users */
+            $users = app(UserService::class);
+            $token = request()->cookie('user_token');
+            $user = $users->getByToken($token);
+            if (! $user) {
+                logger()->warning('transaction_out_unauthorized');
+
+                return null;
+            }
+
+            $tx = Transaction::createOut($user->id, $amount, $note, $date);
+            logger()->info('transaction_out', [
+                'user_id' => $user->id,
+                'amount' => $amount,
+                'note' => $note,
+                'date' => $date,
+            ]);
+
+            return $tx;
+        } catch (\Throwable $e) {
+            logger()->error('transaction_out_error', ['message' => $e->getMessage()]);
+
+            return null;
+        }
     }
 
     protected function persona_chat(string $reason, ?array $premessages): string
-    {        
-        return $this->agentChat->agentPersonaChat($reason, $premessages);   
+    {
+        return $this->agentChat->agentPersonaChat($reason, $premessages);
     }
 
     protected function finance_analyze_chat(string $context)
@@ -178,6 +220,7 @@ class AgentToolService
             if ($n['function'] === 'persona_chat') {
                 $n['param']['premessages'] = ['run'];
             }
+
             return $n;
         }, $items);
 
@@ -185,5 +228,32 @@ class AgentToolService
         logger()->info('finance_analyze_chat', [
             'context' => $context,
         ]);
+    }
+}
+
+class AgentToolCallResult
+{
+    protected array $items;
+
+    public function __construct(array $items)
+    {
+        $this->items = $items;
+    }
+
+    public function all(): array
+    {
+        return $this->items;
+    }
+
+    public function personaChat(): mixed
+    {
+        for ($i = count($this->items) - 1; $i >= 0; $i--) {
+            $it = $this->items[$i];
+            if (($it['function'] ?? null) === 'persona_chat') {
+                return $it['result'] ?? null;
+            }
+        }
+
+        return null;
     }
 }

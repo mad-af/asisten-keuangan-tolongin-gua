@@ -53,7 +53,7 @@ export default function ChatWindow({
                 )}
                 {grouped.map(([date, items]) => (
                     <div key={date}>
-                        <div className="flex justify-center mb-2">
+                        <div className="flex justify-center mt-4 mb-2">
                             <div className="badge bg-white/90 text-medium">
                                 {date}
                             </div>

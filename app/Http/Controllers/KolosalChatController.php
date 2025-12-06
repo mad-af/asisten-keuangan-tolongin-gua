@@ -15,6 +15,6 @@ class KolosalChatController extends Controller
 
         $result = $this->agent->chat($message);
 
-        return response()->json($result, $result['status'] ?? 200);
+        return response()->json($result, 200);
     }
 }

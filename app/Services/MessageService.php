@@ -9,8 +9,7 @@ use Illuminate\Http\Request;
 class MessageService
 {
     public function __construct(
-        protected AgentService $agent,
-        protected AgentChatService $agentChat
+        protected AgentService $agent
     ) {}
 
     public function sendByUser(Request $request)
@@ -23,6 +22,8 @@ class MessageService
             'body' => $userMessage,
             'type' => MessageType::user,
         ]);
+
+        $this->assistantReply($userMessage, $userId);
     }
 
     public function getByUserId(string|int $userId)
@@ -37,6 +38,22 @@ class MessageService
         return Message::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->first();
+    }
+
+    protected function assistantReply(string $message, string $userId)
+    {
+        sleep(1);
+        $responseMessage = "Maaf, saya tidak mengerti. Silakan coba lagi.";
+        $response = $this->agent->chat($message);
+        if (!empty($response)) {
+            $responseMessage = $response->personaChat();
+        }
+
+        Message::create([
+            'user_id' => $userId,
+            'body' => $responseMessage,
+            'type' => MessageType::assistant,
+        ]);
     }
 
     /**
