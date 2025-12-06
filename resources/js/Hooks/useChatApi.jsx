@@ -51,13 +51,13 @@ export function useChatApi(userId) {
                 created_at: new Date().toISOString(),
             };
             setMessages((prev) => [...prev, optimistic]);
-            try {
-                await axios.post(
-                    "/api/chat/send",
-                    { message: body, user_id: targetId },
-                    { withCredentials: true }
-                );
-            } catch (e) {}
+        try {
+            await axios.post(
+                "/api/chat/send",
+                { message: body, user_id: targetId },
+                { withCredentials: true, timeout: 60000 }
+            );
+        } catch (e) {}
         },
         [uid, userId]
     );

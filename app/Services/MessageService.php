@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\MessageType;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MessageService
 {
@@ -42,18 +43,24 @@ class MessageService
 
     protected function assistantReply(string $message, string $userId)
     {
-        sleep(1);
-        $responseMessage = "Maaf, saya tidak mengerti. Silakan coba lagi.";
-        $response = $this->agent->chat($message, $userId);
-        if (!empty($response)) {
-            $responseMessage = $response->personaChat();
+        $responseMessage = 'Maaf, saya tidak mengerti. Silakan coba lagi.';
+        try {
+            $response = $this->agent->chat($message, $userId);
+            if (! empty($response)) {
+                $persona = $response->personaChat();
+                if (is_string($persona) && $persona !== '') {
+                    $responseMessage = $persona;
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('assistantReply_timeout_or_error', ['message' => $e->getMessage()]);
+        } finally {
+            Message::create([
+                'user_id' => $userId,
+                'body' => $responseMessage,
+                'type' => MessageType::assistant,
+            ]);
         }
-
-        Message::create([
-            'user_id' => $userId,
-            'body' => $responseMessage,
-            'type' => MessageType::assistant,
-        ]);
     }
 
     /**

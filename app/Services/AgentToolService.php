@@ -247,7 +247,7 @@ class AgentToolService
 
             return;
         }
-        $this->userId=2;
+
         $financeAnalysisResult = $this->agentChat->agentFinanceAnalyze($context);
         $financeAnalysis = $this->financeAnalyze->executeWithUser($financeAnalysisResult, $this->userId);
 

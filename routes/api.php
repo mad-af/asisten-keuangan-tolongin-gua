@@ -4,6 +4,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\KolosalChatController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\ExtendTimeout;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/kolosal/chat', [KolosalChatController::class, 'completions'])->name('api.kolosal.chat');
@@ -14,7 +15,9 @@ Route::get('/users/me', [UserController::class, 'me'])->name('api.users.me');
 
 Route::get('/messages/{user_id}', [ChatController::class, 'getMessagesByUserId'])->name('api.messages.user');
 Route::get('/messages/{user_id}/latest', [ChatController::class, 'getLatestMessageByUserId'])->name('api.messages.user.latest');
-Route::post('/chat/send', [ChatController::class, 'sendMessageByUser'])->name('api.chat.send');
+Route::post('/chat/send', [ChatController::class, 'sendMessageByUser'])
+    ->middleware(ExtendTimeout::class)
+    ->name('api.chat.send');
 
 Route::get('/transactions', [TransactionController::class, 'index'])->name('api.transactions.index');
 Route::get('/transactions/cashflow', [TransactionController::class, 'cashflow'])->name('api.transactions.cashflow');
