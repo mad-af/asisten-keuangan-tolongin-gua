@@ -56,10 +56,9 @@ export function useChatApi(userId) {
           { message: body, user_id: targetId },
           { withCredentials: true }
         );
-        await fetchMessages();
       } catch (e) {}
     },
-    [uid, userId, fetchMessages]
+    [uid, userId]
   );
 
   const isBlocked = useMemo(() => {
