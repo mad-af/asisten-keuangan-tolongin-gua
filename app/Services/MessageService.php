@@ -41,8 +41,20 @@ class MessageService
             ->first();
     }
 
+    public function createFallbackByUserId(string|int $userId, ?string $body = null)
+    {
+        $text = $body ?? 'Maaf, sedang terjadi kendala. Silakan coba lagi.';
+
+        return Message::create([
+            'user_id' => $userId,
+            'body' => $text,
+            'type' => MessageType::assistant,
+        ]);
+    }
+
     protected function assistantReply(string $message, string $userId)
     {
+        sleep(60);
         $responseMessage = 'Maaf, saya tidak mengerti. Silakan coba lagi.';
         try {
             $response = $this->agent->chat($message, $userId);

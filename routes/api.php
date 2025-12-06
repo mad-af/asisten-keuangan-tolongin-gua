@@ -15,6 +15,7 @@ Route::get('/users/me', [UserController::class, 'me'])->name('api.users.me');
 
 Route::get('/messages/{user_id}', [ChatController::class, 'getMessagesByUserId'])->name('api.messages.user');
 Route::get('/messages/{user_id}/latest', [ChatController::class, 'getLatestMessageByUserId'])->name('api.messages.user.latest');
+Route::post('/messages/{user_id}/fallback', [ChatController::class, 'createFallbackByUserId'])->name('api.messages.user.fallback');
 Route::post('/chat/send', [ChatController::class, 'sendMessageByUser'])
     ->middleware(ExtendTimeout::class)
     ->name('api.chat.send');

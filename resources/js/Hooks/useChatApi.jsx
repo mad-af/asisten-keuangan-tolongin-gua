@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 
 export function useChatApi(userId) {
@@ -51,13 +51,13 @@ export function useChatApi(userId) {
                 created_at: new Date().toISOString(),
             };
             setMessages((prev) => [...prev, optimistic]);
-        try {
-            await axios.post(
-                "/api/chat/send",
-                { message: body, user_id: targetId },
-                { withCredentials: true, timeout: 60000 }
-            );
-        } catch (e) {}
+            try {
+                await axios.post(
+                    "/api/chat/send",
+                    { message: body, user_id: targetId },
+                    { withCredentials: true, timeout: 60000 }
+                );
+            } catch (e) {}
         },
         [uid, userId]
     );
@@ -77,16 +77,16 @@ export function useChatApi(userId) {
         const targetId = uid || userId;
         if (!targetId) return;
         if (!isBlocked || polling) return;
-        let cancelled = false;
+        const attemptsRef = { current: 0 };
+        const cancelRef = { current: false };
         const run = async () => {
             setPolling(true);
             try {
-                let attempts = 0;
                 const lastId =
                     messages && messages.length > 0
                         ? messages[messages.length - 1]?.id
                         : null;
-                while (!cancelled && attempts < 30) {
+                while (!cancelRef.current && attemptsRef.current < 30) {
                     const res = await axios.get(
                         `/api/messages/${targetId}/latest`,
                         { withCredentials: true }
@@ -99,7 +99,22 @@ export function useChatApi(userId) {
                             break;
                         }
                     }
-                    attempts++;
+                    attemptsRef.current++;
+                    console.log(attemptsRef.current);
+                    if (attemptsRef.current >= 3) {
+                        try {
+                            const fb = await axios.post(
+                                `/api/messages/${targetId}/fallback`,
+                                {},
+                                { withCredentials: true }
+                            );
+                            const created = fb?.data;
+                            if (created?.id) {
+                                setMessages((prev) => [...prev, created]);
+                                break;
+                            }
+                        } catch {}
+                    }
                     await new Promise((r) => setTimeout(r, 5000));
                 }
             } finally {
@@ -108,9 +123,9 @@ export function useChatApi(userId) {
         };
         run();
         return () => {
-            cancelled = true;
+            cancelRef.current = true;
         };
-    }, [isBlocked, uid, userId, messages, polling]);
+    }, [isBlocked, uid, userId]);
 
     return { messages, loading, error, fetchMessages, send, isBlocked };
 }

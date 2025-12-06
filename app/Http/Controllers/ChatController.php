@@ -34,4 +34,11 @@ class ChatController extends Controller
 
         return response()->json([]);
     }
+
+    public function createFallbackByUserId($user_id)
+    {
+        $created = $this->messageService->createFallbackByUserId(userId: $user_id);
+
+        return response()->json($created, 201);
+    }
 }
