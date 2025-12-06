@@ -54,7 +54,6 @@ class MessageService
 
     protected function assistantReply(string $message, string $userId)
     {
-        sleep(60);
         $responseMessage = 'Maaf, saya tidak mengerti. Silakan coba lagi.';
         try {
             $response = $this->agent->chat($message, $userId);
