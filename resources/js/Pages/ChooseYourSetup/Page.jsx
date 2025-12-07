@@ -14,7 +14,6 @@ function TestPage() {
                 : null;
         const tokenCookie = getCookie("user_token");
         const setupTypeCookie = localStorage.getItem("setup_type");
-        console.log(tokenCookie && setupTypeCookie, tokenCookie, setupTypeCookie)
         if (tokenCookie && setupTypeCookie) {
             router.visit("/chat");
         }

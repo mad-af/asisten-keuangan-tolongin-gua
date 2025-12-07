@@ -106,7 +106,6 @@ export function useChatApi(userId) {
                         }
                     }
                     attemptsRef.current++;
-                    console.log(attemptsRef.current);
                     if (attemptsRef.current >= 3) {
                         try {
                             const fb = await axios.post(

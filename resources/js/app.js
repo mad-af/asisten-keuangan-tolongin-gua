@@ -6,7 +6,11 @@ import React from "react";
 
 createInertiaApp({
     resolve: (name) => {
-        const pages = import.meta.glob("./Pages/**/*.jsx", { eager: true });
+        const pages = import.meta.glob([
+            "./Pages/**/*.jsx",
+            "!./Pages/**/__tests__/*.jsx",
+            "!./Pages/**/*.test.jsx",
+        ], { eager: true });
         const page = pages[`./Pages/${name}.jsx`];
         return page?.default ?? page;
     },

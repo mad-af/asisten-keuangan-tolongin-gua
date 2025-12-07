@@ -68,7 +68,6 @@ export function useUserApi({ onRegisterSuccess } = {}) {
 
     const setup = useCallback(async (setupType) => {
         try {
-          console.log(localStorage.getItem("user_token"))
             const res = await axios.post(
                 "/api/users/setup",
                 {
