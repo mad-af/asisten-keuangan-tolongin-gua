@@ -102,6 +102,10 @@ php artisan view:cache
 
 [Preview Video](public/assets/preview.mp4)
 
+
+https://github.com/user-attachments/assets/cda669b1-c478-4054-babb-dca98e3b1045
+
+
 <video src="https://github.com/mad-af/asisten-keuangan-tolongin-gua/raw/refs/heads/main/public/assets/preview.mp4" controls width="640"></video>
 
 
