@@ -131,10 +131,14 @@ class AgentChatService
         ])->messageContent();
     }
 
-    public function agentOrchestrator(string $message, ?array $premessages = null): array
+    public function agentOrchestrator(string $message, ?array $premessages = null, bool $requirePersona = false): array
     {
-        return $this->retry(function () use ($message, $premessages) {
+        return $this->retry(function () use ($message, $premessages, $requirePersona) {
             $response = $this->agentOrchestratorChat($message, $premessages);
+
+            if ($requirePersona && ! preg_match('/\bpersona_chat\b/i', (string) $response)) {
+                throw new \RuntimeException('persona_chat missing');
+            }
 
             return $this->decodeOrchestratorResponse($response);
         });

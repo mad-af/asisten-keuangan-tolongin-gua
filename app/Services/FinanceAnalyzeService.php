@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class FinanceAnalyzeService
 {
@@ -61,7 +62,15 @@ class FinanceAnalyzeService
                 continue;
             }
             $filtered = self::injectUserIdFilter($sql, (string) $userId);
-            $rows = DB::select($filtered);
+            try {
+                $rows = DB::select($filtered);
+            } catch (\Throwable $e) {
+                Log::error('FinanceAnalyzeService_query_failed', [
+                    'sql' => $filtered,
+                    'error' => $e->getMessage(),
+                ]);
+                $rows = null;
+            }
             $csv = self::toCsv($rows);
             $parsed->setData($i, $csv);
         }

@@ -12,7 +12,7 @@ class AgentService
      */
     public function __construct(protected AgentChatService $agentChat, protected AgentToolService $agentTool) {}
 
-    public function chat(string $message, ): ?AgentToolCallResult
+    public function chat(string $message): ?AgentToolCallResult
     {
         try {
             $token = request()->cookie('user_token') ?? (string) request()->input('token', '');
@@ -22,7 +22,7 @@ class AgentService
             $resolvedUserId = $user ? (string) $user->id : null;
 
             $premessages = $resolvedUserId ? Message::lastTenRoleContentByUser($resolvedUserId) : null;
-            $orchestrator = $this->agentChat->agentOrchestrator($message, $premessages);
+            $orchestrator = $this->agentChat->agentOrchestrator($message, $premessages, true);
 
             $data = $this->agentTool->call($orchestrator, $resolvedUserId);
         } catch (\Throwable $th) {
