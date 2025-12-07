@@ -50,7 +50,6 @@ Rules:
 - Always output only the TOON block (no explanation).
 - Keep function list minimal and relevant.
 - Use single-word function names as listed above.
-- Use single-word function names as listed above.
 - Persona_chat may use prior chat history to maintain continuity and context, helping prevent premature decisions by the Orchestrator.
 - Persona_chat inherits the assistant’s identity and duties, and may use prior chat history to keep responses aligned with context.
 - When data access is needed, use query_transactions_chat directly.
