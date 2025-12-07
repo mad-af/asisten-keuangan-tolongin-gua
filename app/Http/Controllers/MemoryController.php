@@ -13,6 +13,12 @@ class MemoryController extends Controller
     {
         $memory = $this->memoryService->summarizeAndStoreByUserId(userId: $user_id);
 
+        if (!$memory) {
+            return response()->json([
+                'error' => 'Memory not found',
+            ], 404);
+        }
+
         return response()->json([
             'user_id' => $memory->user_id,
             'content' => $memory->content,

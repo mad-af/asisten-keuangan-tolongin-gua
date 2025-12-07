@@ -10,7 +10,7 @@ class MemoryService
 {
     public function __construct(protected AgentChatService $agentChat) {}
 
-    public function summarizeAndStoreByUserId(string|int $userId): OrchestratorMemory
+    public function summarizeAndStoreByUserId(string|int $userId): ?OrchestratorMemory
     {
         $messages = Message::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
@@ -22,6 +22,10 @@ class MemoryService
 
             return ['role' => $role, 'content' => (string) $m->body];
         })->all();
+
+        if (count($premessages) < 2) {
+            return null;
+        }
 
         try {
             $summary = $this->agentChat->agentMemoryChat($premessages);

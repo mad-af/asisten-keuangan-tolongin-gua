@@ -11,7 +11,7 @@ class AgentService
     /**
      * Create a new class instance.
      */
-    public function __construct(protected AgentChatService $agentChat, protected AgentToolService $agentTool) {}
+    public function __construct(protected AgentChatService $agentChat, protected AgentToolService $agentTool, protected MemoryService $memoryService) {}
 
     public function chat(string $message): ?AgentToolCallResult
     {
@@ -25,12 +25,7 @@ class AgentService
 
             if ($resolvedUserId) {
                 try {
-                    $memoryUrl = rtrim((string) config('app.url'), '/').'/api/memory/'.$resolvedUserId.'/summarize';
-                    $promise = Http::async()->get($memoryUrl);
-                    Log::info('memory_summarize_triggered', [
-                        'user_id' => $resolvedUserId,
-                        'status' => $promise?->status(),
-                    ]);
+                    $this->memoryService->summarizeAndStoreByUserId($resolvedUserId);
                 } catch (\Throwable $e) {
                     Log::warning('memory_summarize_trigger_error', ['user_id' => $resolvedUserId, 'error' => $e->getMessage()]);
                 }
