@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CacheController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\KolosalChatController;
 use App\Http\Controllers\TransactionController;
@@ -19,6 +20,8 @@ Route::post('/messages/{user_id}/fallback', [ChatController::class, 'createFallb
 Route::post('/chat/send', [ChatController::class, 'sendMessageByUser'])
     ->middleware(ExtendTimeout::class)
     ->name('api.chat.send');
+
+Route::get('/cache/clear', [CacheController::class, 'clear'])->name('api.cache.clear');
 
 Route::get('/transactions', [TransactionController::class, 'index'])->name('api.transactions.index');
 Route::get('/transactions/cashflow', [TransactionController::class, 'cashflow'])->name('api.transactions.cashflow');
