@@ -8,20 +8,27 @@ class AgentChatService
 {
     public function __construct(protected KolosalApiClient $chatClient) {}
 
-    private function agentOrchestratorMessages(string $message): array
+    private function agentOrchestratorMessages(string $message, ?array $premessages = null): array
     {
         $content = $this->systemContext('orchestrator', ['today' => date('Y-m-d')]);
 
-        return [
+        $messages = [
             [
                 'role' => 'system',
                 'content' => $content,
             ],
-            [
-                'role' => 'user',
-                'content' => $message,
-            ],
         ];
+
+        if ($premessages !== null) {
+            $messages = array_merge($messages, $premessages);
+        }
+
+        $messages[] = [
+            'role' => 'user',
+            'content' => $message,
+        ];
+
+        return $messages;
     }
 
     private function agentPersonaMessages(?string $message, ?array $premessages): array
@@ -92,11 +99,11 @@ class AgentChatService
         return $content;
     }
 
-    public function agentOrchestratorChat(string $message): string
+    public function agentOrchestratorChat(string $message, ?array $premessages = null): string
     {
         return $this->chatClient->chatCompletions([
             'max_tokens' => 1000,
-            'messages' => $this->agentOrchestratorMessages($message),
+            'messages' => $this->agentOrchestratorMessages($message, $premessages),
         ])->messageContent();
     }
 
@@ -124,10 +131,10 @@ class AgentChatService
         ])->messageContent();
     }
 
-    public function agentOrchestrator(string $message): array
+    public function agentOrchestrator(string $message, ?array $premessages = null): array
     {
-        return $this->retry(function () use ($message) {
-            $response = $this->agentOrchestratorChat($message);
+        return $this->retry(function () use ($message, $premessages) {
+            $response = $this->agentOrchestratorChat($message, $premessages);
 
             return $this->decodeOrchestratorResponse($response);
         });
