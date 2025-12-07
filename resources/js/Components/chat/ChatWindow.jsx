@@ -13,6 +13,7 @@ export default function ChatWindow({
     disabled = false,
 }) {
     const listRef = useRef(null);
+    const bottomRef = useRef(null);
     const safeMessages = forceEmpty
         ? []
         : Array.isArray(messages)
@@ -20,9 +21,7 @@ export default function ChatWindow({
         : [];
 
     useEffect(() => {
-        if (listRef.current) {
-            listRef.current.scrollTop = listRef.current.scrollHeight;
-        }
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [safeMessages]);
 
     const grouped = useMemo(() => {
@@ -37,7 +36,7 @@ export default function ChatWindow({
 
     return (
         <div className="grow w-full flex flex-col">
-            <div ref={listRef} className="flex-1 px-2 py-4">
+            <div ref={listRef} className="flex-1 px-2 py-4 overflow-y-auto">
                 {grouped.length === 0 && (
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center p-6 rounded-lg">
@@ -71,6 +70,7 @@ export default function ChatWindow({
                         </div>
                     </div>
                 ))}
+                <div ref={bottomRef} />
             </div>
             {disabled && (
                 <div className="px-4 pb-1 text-xs opacity-70 text-base-content text-center">
