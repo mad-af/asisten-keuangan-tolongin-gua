@@ -2,7 +2,7 @@
 
 <p align="center">
   <span>
-    <img src="https://img.shields.io/badge/coverage-110%25-brightgreen" alt="imphnen (Organizer)">
+    <img src="https://img.shields.io/badge/coverage-101%25-brightgreen" alt="imphnen (Organizer)">
   </span>
   <a href="https://www.facebook.com/groups/1032515944638255">
     <img src="https://img.shields.io/badge/imphnen-Organizer-blueviolet" alt="imphnen (Organizer)">
@@ -41,6 +41,14 @@ Asistan ini berjalan dalam simulasi WhatsApp agar langsung menyasar kebiasaan pe
 
 ```bash
 cp .env.example .env
+```
+
+```bash
+# install dependencies frontend
+bun i
+
+# install dependencies PHP
+composer i
 ```
 
 - Opsi SQLite (paling cepat):
@@ -88,6 +96,15 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ``` 
+
+
+## Demo Video
+
+[Preview Video](public/assets/preview.mp4)
+
+<video src="public/assets/preview.mp4" controls width="640"></video>
+
+
 
 ## Tim
 
