@@ -102,7 +102,7 @@ php artisan view:cache
 
 [Preview Video](public/assets/preview.mp4)
 
-<video src="public/assets/preview.mp4" controls width="640"></video>
+<video src="https://github.com/mad-af/asisten-keuangan-tolongin-gua/raw/refs/heads/main/public/assets/preview.mp4" controls width="640"></video>
 
 
 
