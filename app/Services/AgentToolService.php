@@ -223,6 +223,90 @@ class AgentToolService
         }
     }
 
+    protected function transaction_edit(?int $match_amount = null, ?string $match_note = null, ?string $match_type = null, ?int $amount = null, ?string $note = null, ?string $type = null, ?string $date = null)
+    {
+        try {
+            $this->resolveUserIdFromRequest();
+            if (! $this->userId) {
+                logger()->warning('transaction_edit_unauthorized');
+
+                return null;
+            }
+
+            $changes = [];
+            if ($amount !== null) {
+                $changes['amount'] = $amount;
+            }
+            if ($note !== null) {
+                $changes['note'] = $note;
+            }
+            if ($type !== null) {
+                $changes['type'] = $type;
+            }
+            if ($date !== null) {
+                $changes['date'] = $date;
+            }
+
+            $updated = null;
+            if ($match_amount !== null) {
+                $updated = Transaction::editByAmount($this->userId, $match_amount, $changes);
+            } elseif ($match_note !== null) {
+                $updated = Transaction::editByNote($this->userId, $match_note, $changes);
+            } elseif ($match_type !== null) {
+                $updated = Transaction::editByType($this->userId, $match_type, $changes);
+            }
+
+            logger()->info('transaction_edit', [
+                'user_id' => $this->userId,
+                'match_amount' => $match_amount,
+                'match_note' => $match_note,
+                'match_type' => $match_type,
+                'changes' => $changes,
+                'updated_id' => $updated?->id,
+            ]);
+            $premessages = [];
+            if ($updated) {
+                $premessages[] = [
+                    'role' => 'assistant',
+                    'content' => 'Transaksi diperbarui: id='.$updated->id.'; perubahan='.json_encode($changes, JSON_UNESCAPED_UNICODE),
+                ];
+            } else {
+                $desc = [];
+                if ($match_amount !== null) {
+                    $desc[] = 'amount='.$match_amount;
+                }
+                if ($match_note !== null) {
+                    $desc[] = 'note='.$match_note;
+                }
+                if ($match_type !== null) {
+                    $desc[] = 'type='.$match_type;
+                }
+                $premessages[] = [
+                    'role' => 'assistant',
+                    'content' => 'Transaksi tidak ditemukan untuk kriteria: '.implode(', ', $desc ?: ['(kosong)']),
+                ];
+            }
+
+            $items = $this->getOrchestrator();
+            $result = array_map(function ($n) use ($premessages) {
+                if (($n['function'] ?? null) === 'persona_chat') {
+                    $n['param'] = $n['param'] ?? [];
+                    $existing = $n['param']['premessages'] ?? [];
+                    $n['param']['premessages'] = array_merge(is_array($existing) ? $existing : [], $premessages);
+                }
+
+                return $n;
+            }, $items);
+            $this->setOrchestrator($result);
+
+            return $updated;
+        } catch (\Throwable $e) {
+            logger()->error('transaction_edit_error', ['message' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
     protected function persona_chat(string $reason, ?array $premessages): string
     {
         $messages = $premessages;
@@ -239,11 +323,11 @@ class AgentToolService
         return $this->agentChat->agentPersonaChat($reason, $messages);
     }
 
-    protected function finance_analyze_chat(string $context)
+    protected function query_transactions_chat(string $context)
     {
         $this->resolveUserIdFromRequest();
         if (! $this->userId) {
-            logger()->warning('finance_analyze_chat_unauthorized');
+            logger()->warning('query_transactions_chat_unauthorized');
 
             return;
         }
@@ -256,7 +340,8 @@ class AgentToolService
         $result = array_map(function ($n) use ($financeAnalysis) {
             if (($n['function'] ?? null) === 'persona_chat') {
                 $n['param'] = $n['param'] ?? [];
-                $n['param']['premessages'] = $financeAnalysis->generateMessages();
+                $existing = $n['param']['premessages'] ?? [];
+                $n['param']['premessages'] = array_merge(is_array($existing) ? $existing : [], $financeAnalysis->generateMessages());
             }
 
             return $n;
@@ -265,8 +350,91 @@ class AgentToolService
         $this->setOrchestrator($result);
         logger()->info('finance_analyze_chat', [
             'context' => $context,
-            'financeAnalyzeResult' => $financeAnalysisResult,
+            'financeAnalyzeResult' => $financeAnalysisResult->all(),
         ]);
+    }
+
+    protected function transaction_delete(?int $match_amount = null, ?string $match_note = null, ?string $match_type = null, ?string $match_date = null)
+    {
+        try {
+            $this->resolveUserIdFromRequest();
+            if (! $this->userId) {
+                logger()->warning('transaction_delete_unauthorized');
+
+                return null;
+            }
+
+            $query = Transaction::where('user_id', $this->userId);
+            if ($match_amount !== null) {
+                $query->where('amount', $match_amount);
+            } elseif ($match_note !== null) {
+                $query->where('note', $match_note);
+            } elseif ($match_type !== null) {
+                $query->where('type', $match_type);
+            } elseif ($match_date !== null) {
+                $query->where('date', $match_date);
+            }
+
+            $tx = $query->orderByDesc('date')->first();
+            $deletedId = null;
+            if ($tx) {
+                $deletedId = $tx->id;
+                $tx->delete();
+            }
+
+            logger()->info('transaction_delete', [
+                'user_id' => $this->userId,
+                'match_amount' => $match_amount,
+                'match_note' => $match_note,
+                'match_type' => $match_type,
+                'match_date' => $match_date,
+                'deleted_id' => $deletedId,
+            ]);
+
+            $premessages = [];
+            if ($deletedId !== null) {
+                $premessages[] = [
+                    'role' => 'assistant',
+                    'content' => 'Transaksi dihapus: id='.$deletedId,
+                ];
+            } else {
+                $desc = [];
+                if ($match_amount !== null) {
+                    $desc[] = 'amount='.$match_amount;
+                }
+                if ($match_note !== null) {
+                    $desc[] = 'note='.$match_note;
+                }
+                if ($match_type !== null) {
+                    $desc[] = 'type='.$match_type;
+                }
+                if ($match_date !== null) {
+                    $desc[] = 'date='.$match_date;
+                }
+                $premessages[] = [
+                    'role' => 'assistant',
+                    'content' => 'Transaksi tidak ditemukan untuk kriteria: '.implode(', ', $desc ?: ['(kosong)']),
+                ];
+            }
+
+            $items = $this->getOrchestrator();
+            $result = array_map(function ($n) use ($premessages) {
+                if (($n['function'] ?? null) === 'persona_chat') {
+                    $n['param'] = $n['param'] ?? [];
+                    $existing = $n['param']['premessages'] ?? [];
+                    $n['param']['premessages'] = array_merge(is_array($existing) ? $existing : [], $premessages);
+                }
+
+                return $n;
+            }, $items);
+            $this->setOrchestrator($result);
+
+            return $deletedId;
+        } catch (\Throwable $e) {
+            logger()->error('transaction_delete_error', ['message' => $e->getMessage()]);
+
+            return null;
+        }
     }
 }
 

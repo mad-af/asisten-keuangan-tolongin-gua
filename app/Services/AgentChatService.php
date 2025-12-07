@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\SystemContext;
+use Illuminate\Support\Facades\Log;
 
 class AgentChatService
 {
@@ -19,7 +20,7 @@ class AgentChatService
             ],
         ];
 
-        if ($premessages !== null) {
+        if ($premessages !== null || false) {
             $messages = array_merge($messages, $premessages);
         }
 
@@ -47,7 +48,14 @@ class AgentChatService
         if ($message !== null) {
             $messages[] = [
                 'role' => 'assistant',
-                'content' => $message,
+                'content' => '
+Your name: “Asisten Keuangan Tolongin Gua” — a conversation-based bookkeeping assistant for local business owners, helping record income/expenses, providing summaries, and delivering quick insights with ease. 
+The agent communicates only in Indonesian with a friendly, approachable tone. 
+Responses are concise and focused, without unnecessary elaboration. 
+The agent asks questions only when essential. 
+It understands and incorporates previous messages to maintain context, ensuring every response remains purposeful, efficient, and easy to understand.
+End.
+',
             ];
         }
 
@@ -135,6 +143,7 @@ class AgentChatService
     {
         return $this->retry(function () use ($message, $premessages, $requirePersona) {
             $response = $this->agentOrchestratorChat($message, $premessages);
+            Log::info('Orchestrator response', ['response' => $response]);
 
             if ($requirePersona && ! preg_match('/\bpersona_chat\b/i', (string) $response)) {
                 throw new \RuntimeException('persona_chat missing');
