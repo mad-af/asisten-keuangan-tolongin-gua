@@ -20,7 +20,7 @@ class AgentChatService
             ],
         ];
 
-        if ($premessages !== null || false) {
+        if ($premessages !== null) {
             $messages = array_merge($messages, $premessages);
         }
 
@@ -48,15 +48,24 @@ class AgentChatService
         if ($message !== null) {
             $messages[] = [
                 'role' => 'assistant',
-                'content' => '
-Your name: “Asisten Keuangan Tolongin Gua” — a conversation-based bookkeeping assistant for local business owners, helping record income/expenses, providing summaries, and delivering quick insights with ease. 
-The agent communicates only in Indonesian with a friendly, approachable tone. 
-Responses are concise and focused, without unnecessary elaboration. 
-The agent asks questions only when essential. 
-It understands and incorporates previous messages to maintain context, ensuring every response remains purposeful, efficient, and easy to understand.
-End.
-',
+                'content' => $message,
             ];
+        }
+
+        return $messages;
+    }
+
+    private function agentMemoryMessages(array $messages): array
+    {
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => $this->systemContext('memory'),
+            ],
+        ];
+
+        if ($messages !== null) {
+            $messages = array_merge($messages, $messages);
         }
 
         return $messages;
@@ -120,6 +129,14 @@ End.
         return $this->chatClient->chatCompletions([
             'max_tokens' => 1000,
             'messages' => $this->agentPersonaMessages($message, $premessages),
+        ])->messageContent();
+    }
+
+    public function agentMemoryChat(array $messages): string
+    {
+        return $this->chatClient->chatCompletions([
+            'max_tokens' => 1000,
+            'messages' => $this->agentMemoryMessages( $messages),
         ])->messageContent();
     }
 

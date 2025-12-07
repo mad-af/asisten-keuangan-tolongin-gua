@@ -3,12 +3,16 @@
 use App\Http\Controllers\CacheController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\KolosalChatController;
+use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\ExtendTimeout;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/kolosal/chat', [KolosalChatController::class, 'completions'])->name('api.kolosal.chat');
+Route::get('/memory/{user_id}/summarize', [MemoryController::class, 'summarizeByUserId'])
+    ->middleware(ExtendTimeout::class)
+    ->name('api.memory.summarize');
 
 Route::post('/users/register', [UserController::class, 'register'])->name('api.users.register');
 Route::post('/users/setup', [UserController::class, 'setup'])->name('api.users.setup');
